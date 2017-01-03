@@ -1,0 +1,55 @@
+html
+  head
+    meta(charset="utf-8")
+    meta(http-equiv="X-UA-Compatible", content="IE=edge")
+    meta(name="viewport", content="width=device-width, initial-scale=1")
+    title=title
+    link(href='//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css', rel='stylesheet')
+    link(href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/themes/smoothness/jquery-ui.css")
+    style
+      include style.css
+  body
+    div.container
+      div.jumbotron
+        h1 #{__('Hello')}!
+
+        p #{__('Welcome to')} 500
+        div.btn-group(data-toggle="buttons")
+          if locale == 'en'
+            label.btn.btn-primary.active English
+          else
+            label.btn.btn-primary English
+              input#en(type="radio", name="languageOptions", autocomplete="off", checked) 
+          if locale == 'sv'
+            label.btn.btn-primary.active Svenska
+          else
+            label.btn.btn-primary Svenska
+              input#sv(type="radio", name="languageOptions", autocomplete="off") 
+      div#chooseNameDiv
+        form.form-inline(role="form", id="chooseNameForm")
+          div.form-group
+            label(for="name", id="nameLabel") #{__('Name')}: 
+            input.form-control(type="text", id="name", placeholder="Sven")
+          button.btn.btn-default(type="submit") #{__('Start')}
+      div#content(style="display: none;")
+        div#lobby.panel.panel-default
+          ul#gamesList.list-plain
+          ul.list-plain
+            li
+              button#newGame.btn.btn-primary #{__('New Game')}
+        div#game.clearfix(style="display: none;")
+          ul#hand.list-plain
+        div#chat
+          div.panel.panel-default
+            div.panel-heading
+              h3.panel-title #{__('Chat')}
+              div#userList
+            div.panel-body
+              ul#messages.list-plain
+          form#chatForm
+            div.input-group
+              input#m.form-control(type="text")
+              span.input-group-btn
+                button.btn.btn-default(type="submit") #{__('Send')}
+    -each script in scripts 
+      script(type='text/javascript', src= script)

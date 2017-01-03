@@ -1,0 +1,54 @@
+.form-inline .form-control {
+  display: inline-block;
+  margin-right:4px;
+}
+#nameLabel {
+  margin-right:4px;
+}
+.panel {
+	margin-bottom:4px;
+}
+.panel-body {
+	height:250px;
+	overflow: auto;
+}
+.btn-margin-left {
+	margin-left:8px;
+}
+.current-game {
+	background-color:#eee;
+}
+
+.list-plain { list-style-type: none; margin: 0; padding: 0; }
+#messages li { padding: 5px 10px; }
+/* #messages li:nth-child(odd) { background: #eee; } */
+
+#hand {
+	position: relative;
+}
+.card {
+	width:150px;
+}
+.card-placeholder {
+	background-color: gray;
+}
+.list-item-card {
+	display: inline;
+	float: left;
+	position: absolute;
+}
+.clearfix:after { 
+   content: " ";
+   display: block; 
+   height: 0; 
+   clear: both;
+}
+
+@media(max-width:767px){
+	.card {
+		width:100px;
+	}
+}
+@media(min-width:768px){}
+@media(min-width:992px){}
+@media(min-width:1200px){}
