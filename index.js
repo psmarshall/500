@@ -12,7 +12,7 @@ i18n.configure({
     directory: __dirname + '/locales'
 });
 
-app.set('view engine', 'jade');
+app.set('view engine', 'pug');
 app.use(express.static(__dirname + '/public'));
 //enable multi-lingual support
 app.use(i18n.init);
