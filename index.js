@@ -36,10 +36,6 @@ console.log(hand);
 */
 
 app.get('/', function(req, res){
-  res.sendFile(__dirname + '/index.html');
-});
-
-app.get('/test', function(req, res){
   var loc = req.cookies['500_language'];
   if (loc == null) {
     loc = 'en';

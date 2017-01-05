@@ -6,4 +6,4 @@ Run server:
 
 ```$ node index.js```
 
-Browse to http://localhost:3000/test
+Browse to http://localhost:3000
