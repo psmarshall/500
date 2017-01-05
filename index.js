@@ -44,12 +44,12 @@ app.get('/', function(req, res){
   req.setLocale(loc);
   res.render('home', {
     title: 'Welcome',
-    scripts: ['http://cdn.socket.io/socket.io-1.2.0.js',
-    		  'https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js',
+    scripts: ['/socket.io/socket.io.js',
+          'https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js',
           '/jquery.cookie.js',
-          'https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js',
-    		  '/client.js',
-          'http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js'],
+          'https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js',
+          '/client.js',
+          'http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js'],
     locale: loc
   });
 });
