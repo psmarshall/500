@@ -159,9 +159,3 @@ $('#hand').sortable({
   }
 });
 $('#hand').disableSelection();
-
-
-
-
-
-
