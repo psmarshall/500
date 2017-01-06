@@ -15,5 +15,5 @@ describe('Index', function() {
           done();
         });
     });
-  })
+  });
 });
