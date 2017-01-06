@@ -22,6 +22,12 @@ var handSize = 5;
 var cardWidth = (canvas.width - ((handSize + 1) * 20)) / handSize;
 var cardHeight = 1.4523 * cardWidth;
 
+$("#canvas").dblclick(function(event) {
+  mouseX = event.pageX - this.offsetLeft;
+  mouseY = event.pageY - this.offsetTop;
+  console.log('x: ' + mouseX + ', y: ' + mouseY);
+});
+
 function render(hand) {
   canvas.width = $("#content").width();
   context.clearRect(0, 0, canvas.width, canvas.height);
