@@ -13,9 +13,10 @@ describe('Game', function() {
 
   describe('shuffle', function() {
     it('should have same number of cards', function() {
-      var p = game.createPack();
-      var s = game.shuffle(p);
-      p.should.have.lengthOf(s.length);
+      var pack = game.createPack();
+      var initialLength = pack.length;
+      var shuffled = game.shuffle(pack);
+      shuffled.should.have.lengthOf(initialLength);
     });
   })
 
