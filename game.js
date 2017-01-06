@@ -29,7 +29,7 @@ function shuffle(pack) {
   return pack;
 }
 
-function draw(pack, amount, hand, initial) {  
+function draw(pack, amount, hand, initial = false) {
   var cards = [];
   cards = pack.slice(0, amount);
 

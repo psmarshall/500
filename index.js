@@ -25,10 +25,10 @@ var games = [];
 /*
 console.log(hand);
 
-game.draw(pack, 1, hand, false);
+game.draw(pack, 1, hand);
 console.log(hand); 
 
-game.draw(pack, 2, hand, false);
+game.draw(pack, 2, hand);
 console.log(hand); 
 
 game.playCard(1, hand, hand.length-1); 
