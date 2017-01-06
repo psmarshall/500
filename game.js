@@ -1,5 +1,5 @@
 function createPack() {  
-  var suits = ["hearts", "clubs", "spades", "diamonds"];
+  var suits = ['hearts', 'clubs', 'spades', 'diamonds'];
   var cards = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'jack', 'queen', 'king', 'ace'];
   var pack = [];
   var n = 52;
@@ -8,7 +8,7 @@ function createPack() {
   var count = 0;
   for(i = 0; i < 4; i++) {
     for(j = 0; j < cards.length; j++) {
-      var cardname = cards[j] + "_of_" + suits[i];
+      var cardname = cards[j] + '_of_' + suits[i];
       if (j > 8 && j < 12) cardname += '2'; //use full face card images
       pack[count++] = cardname;
     }
