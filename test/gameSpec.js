@@ -18,4 +18,23 @@ describe('Game', function() {
       p.should.have.lengthOf(s.length);
     });
   })
+
+  describe('draw', function() {
+    describe('one card', function() {
+      it('should draw the requested number', function() {
+        var pack = game.createPack();
+        var cards = game.draw(pack, 1, [], false);
+        cards.should.have.lengthOf(1);
+      });
+    });
+
+    describe('three cards', function() {
+      it('should draw the requested number', function() {
+        var pack = game.createPack();
+        var cards = game.draw(pack, 3, [], false);
+        cards.should.have.lengthOf(3);
+      });
+    });
+
+  });
 });
