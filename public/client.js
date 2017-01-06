@@ -9,6 +9,33 @@ $('#chooseNameForm').submit(function(){
   return false;
 });
 
+// Canvas stuff.
+var canvas = document.createElement("canvas");
+var context = canvas.getContext("2d");
+canvas.width = $("#chooseNameDiv").width();
+canvas.height = 512;
+$('#canvas')[0].appendChild(canvas);
+
+var gapWidth = 20;
+var gapHeight = 20;
+var handSize = 5;
+var cardWidth = (canvas.width - ((handSize + 1) * 20)) / handSize;
+var cardHeight = 1.4523 * cardWidth;
+
+function render(hand) {
+  canvas.width = $("#content").width();
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  var ypos = canvas.height - cardHeight - gapHeight;
+  for (let i = 0; i < hand.length; i++) {
+    let card = new Image();
+    card.src = 'images/' + hand[i] + '.svg';
+    card.onload = function() {
+      var xpos = (i + 1) * 20 + i * cardWidth;
+      context.drawImage(card, xpos, ypos, cardWidth, cardHeight);
+    }
+  }
+}
+
 //handle send message
 $('#chatForm').submit(function(){
   socket.emit('chat message', $('#m').val());
@@ -102,17 +129,7 @@ socket.on('game started', function(msg){
 
 // handle update of cards in hand
 socket.on('hand', function(hand){
-  $('#hand').empty();
-  for (var i = 0; i < hand.length; i++) {
-    var list_item = $('<li>').addClass('list-item-card');
-    var card = $('<img>').attr('src', 'images/' + hand[i] + '.svg');
-
-    card.addClass('card');
-    list_item.append(card);
-    list_item.css('left', i * 1.5 + 'em');
-    list_item.css('z-index', i);
-    $('#hand').append(list_item);
-  }
+  render(hand);
 });
 
 //respond to typing events from other users
@@ -136,26 +153,3 @@ $("input[name=languageOptions]").change(function () {
   $.cookie('500_language', $(this).attr('id'), { expires : 365 });
   window.location.reload(true); 
 });
-
-$('#hand').sortable({
-  opacity: 0.8,
-  cursor: 'move',
-  tolerance: 'pointer',
-  update: function() {
-    var i = 0;
-    $('.list-item-card').each(function() {
-      $(this).css('left', i * 1.5 + 'em');
-      $(this).css('z-index', i);
-      i++;
-    });
-  },
-  change: function() {
-    var i = 0;
-    $('.list-item-card').not('.ui-sortable-helper').each(function() {
-      $(this).css('left', i * 1.5 + 'em');
-      $(this).css('z-index', i);
-      i++;
-    });
-  }
-});
-$('#hand').disableSelection();
