@@ -27,8 +27,8 @@ $('#newGame').click(function(){
 
 //For title flashing
 var isOldTitle = true;
-var oldTitle = "500";
-var newTitle = "New Message";
+var oldTitle = '500';
+var newTitle = 'New Message';
 var interval = null;
 function changeTitle() {
   document.title = isOldTitle ? oldTitle : newTitle;
@@ -37,7 +37,7 @@ function changeTitle() {
 
 $(window).focus(function () {
   clearInterval(interval);
-  $("title").text(oldTitle);
+  $('title').text(oldTitle);
 });
 
 //handle receiving a message
@@ -119,7 +119,7 @@ socket.on('hand', function(hand){
 socket.on('start typing', function(user){
   //add 'typing' message if it doesn't exist.
   if (!$('#'+user).length) {
-    $('#messages').append($('<li id="'+user+'">').text(user + " is typing..."));
+    $('#messages').append($('<li id="'+user+'">').text(user + ' is typing...'));
   }
 });
 socket.on('stop typing', function(user){

@@ -60,7 +60,7 @@ io.on('connection', function(socket){
   //join the room for their locale
   socket.join(locale);
   socket.on('chat message', function(msg){
-    socket.broadcast.emit('chat message', players[socket.id] + ": " + msg);
+    socket.broadcast.emit('chat message', players[socket.id] + ': ' + msg);
   });
 
   socket.on('new user', function(name){
@@ -132,7 +132,7 @@ io.on('connection', function(socket){
     delete players[socket.id];
     socket.broadcast.emit('user list', playersToList(players));
     for(var key in players) {
-      console.log("Remaining players: " + key + ": " + players[key]);
+      console.log('Remaining players: ' + key + ': ' + players[key]);
     }
 
     //remove user from any games they were in
@@ -209,7 +209,7 @@ function joinGame(socket, host_id) {
 }
 
 function playersToList(players) {
-  var list = "";
+  var list = '';
   for(var key in players) {
     list += players[key] + ', ';
   }
