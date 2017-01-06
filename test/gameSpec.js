@@ -34,6 +34,13 @@ describe('Game', function() {
         pack.should.have.lengthOf(initialLength - 1);
         pack.should.not.include(cards[0]);
       });
+
+      it('should put the drawn card into the hand', function() {
+        var hand = [];
+        var cards = game.draw(game.createPack(), 1, hand);
+        hand.should.have.lengthOf(1);
+        hand.should.include(cards[0]);
+      });
     });
 
     describe('three cards', function() {
@@ -49,6 +56,13 @@ describe('Game', function() {
         var cards = game.draw(pack, 3, []);
         pack.should.have.lengthOf(initialLength - 3);
         pack.should.not.have.members(cards);
+      });
+
+      it('should put the drawn cards into the hand', function() {
+        var hand = [];
+        var cards = game.draw(game.createPack(), 3, hand);
+        hand.should.have.lengthOf(3);
+        hand.should.have.members(cards);
       });
     });
 
