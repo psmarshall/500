@@ -1,7 +1,7 @@
 function createPack() {  
-  var suits = new Array("hearts", "clubs", "spades", "diamonds");
+  var suits = ["hearts", "clubs", "spades", "diamonds"];
   var cards = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'jack', 'queen', 'king', 'ace'];
-  var pack = new Array();
+  var pack = [];
   var n = 52;
   var index = n / suits.length;
 
@@ -30,7 +30,7 @@ function shuffle(pack) {
 }
 
 function draw(pack, amount, hand, initial) {  
-  var cards = new Array();
+  var cards = [];
   cards = pack.slice(0, amount);
 
   pack.splice(0, amount);
