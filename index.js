@@ -112,6 +112,11 @@ io.on('connection', function(socket){
     var cur_players = cur_game.players;
     //deal cards
     var game = require('./game');
+
+    var Gameclass = require('./public/game/game');
+    var g = new Gameclass();
+    g.standardDeck();
+
     var pack = game.createPack();
     pack = game.shuffle(pack);
     for (var i = 0; i < num_players; i++) {
