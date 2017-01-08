@@ -98,16 +98,16 @@ socket.on('user list', function(list){
 socket.on('games list', function(games){
   //clear old list
   $('#gamesList').empty();
-  $.each(games, function(key, value) {
-    var num_players = value.players.length;
-    var list_item = $('<li>').text(value.host_name 
+  $.each(games, function(key, game) {
+    var num_players = game.players.length;
+    var list_item = $('<li>').text(game.hostName
         + ' (' + num_players + ' players)');
     //add a join button, if it is not their game and they aren't already in it
-    if (value.host_id != socket.io.engine.id) {
-      if ($.inArray(socket.io.engine.id, value.players) == -1) {
+    if (game.id != socket.io.engine.id) {
+      if ($.inArray(socket.io.engine.id, game.players) == -1) {
         var join_button = $('<a>').text('Join').addClass('btn btn-primary btn-sm btn-margin-left');
         join_button.click(function() {
-          socket.emit('join game', value.host_id);
+          socket.emit('join game', game.hostId);
         });
         list_item.append(join_button);
       } else {

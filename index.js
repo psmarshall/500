@@ -63,7 +63,7 @@ io.on('connection', function(socket){
   // Join the room for their locale.
   socket.join(locale);
   socket.on('chat message', function(msg){
-    socket.broadcast.emit('chat message', players[socket.id] + ': ' + msg);
+    socket.broadcast.emit('chat message', players[socket.id].name + ': ' + msg);
   });
 
   socket.on('new user', function(name){
@@ -84,11 +84,11 @@ io.on('connection', function(socket){
 
   socket.on('start typing', function(msg){
     //sends to all except current
-    socket.broadcast.emit('start typing', players[socket.id]);
+    socket.broadcast.emit('start typing', players[socket.id].name);
   });
   socket.on('stop typing', function(msg){
     //sends to all except current
-    socket.broadcast.emit('stop typing', players[socket.id]);
+    socket.broadcast.emit('stop typing', players[socket.id].name);
   });
 
   socket.on('get games', function(msg){
@@ -97,13 +97,17 @@ io.on('connection', function(socket){
 
   socket.on('new game', function(msg){
     newGame(socket);
+    console.log('Done new game.');
+    console.log(games);
     //update all games lists
     io.sockets.emit('games list', games);
   });
 
-  socket.on('join game', function(hostId){
-    joinGame(socket, hostId);
-    //update all games lists
+  socket.on('join game', function(hostId) {
+    var game = getGame(hostId);
+    game.addPlayer(players[socket.id]);
+    socket.join('game ' + hostId);
+    // Update all games lists.
     io.sockets.emit('games list', games);
   });
 
@@ -113,10 +117,8 @@ io.on('connection', function(socket){
     io.to('game ' + socket.id).emit('game started', '');
 
     var curGame = getGame(socket.id);
-    var numPlayers = curGame.numPlayers();
-    var curPlayers = curGame.players;
 
-    //deal cards
+    // Deal cards.
     curGame.deal(5);
     curGame.eachPlayer(function(player) {
       io.to(player.id).emit('hand', player.hand);
@@ -137,8 +139,8 @@ io.on('connection', function(socket){
       console.log('Remaining players: ' + key + ': ' + players[key]);
     }
 
-    //remove user from any games they were in
-    leaveGames(socket.id);
+    // Remove user from any games they were in.
+    // leaveGames(socket.id);
     socket.broadcast.emit('games list', games);
   });
 });
@@ -155,8 +157,8 @@ function getGame(hostId) {
 function newGame(socket) {
   var hostId = socket.id;
   // First, leave current game.
-  leaveGames(hostId);
-  var newGame = new Game(hostId, players[hostId], [hostId]);
+  // leaveGames(hostId);
+  var newGame = new Game(hostId, players[hostId].name, [players[hostId]]);
 
   games.push(newGame);
   // Join room for game.
@@ -190,20 +192,6 @@ function leaveGames(playerId) {
         }
         break;
       }
-    }
-  }
-}
-
-function joinGame(socket, hostId) {
-  var player_id = socket.id;
-  // first, leave current game
-  leaveGames(player_id);
-  for (var i = 0; i < games.length; i++) {
-    if (games[i].hostId == hostId) {
-      // add the player to the game
-      games[i].players.push(player_id);
-      // add the player to the associated room
-      socket.join('game ' + hostId);
     }
   }
 }
