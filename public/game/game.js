@@ -1,6 +1,5 @@
 'use strict';
 
-var Card = require('./card');
 var Pack = require('./pack');
 
 module.exports = class Game {
