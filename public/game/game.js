@@ -1,19 +1,18 @@
 'use strict';
 
 var Card = require('./card');
+var Pack = require('./pack');
 
 module.exports = class Game {
-  standardDeck() {
-    var pack = [];
-    for (let suit of Card.SUIT_TYPES) {
-      for (let number of Card.NUMBER_TYPES) {
-        var imagePath = number + '_of_' + suit;
-        // Use full face card images.
-        if (Card.isFaceCard(number)) imagePath += '2';
-        var card = new Card(suit, number, imagePath);
-        pack.push(card);
-      }
+  constructor(players) {
+    this.players = players;
+    this.pack = new Pack();
+    this.pile = [];
+  }
+
+  deal(handSize) {
+    for (let player of this.players) {
+      player.addToHand(this.pack.draw(7));
     }
-    return pack;
   }
 }

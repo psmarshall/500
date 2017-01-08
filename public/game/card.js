@@ -6,6 +6,13 @@ class Card {
     this.number = number;
     this.imagePath = imagePath;
   }
+
+  static isFaceCard(number) {
+    return number === 'ace' ||
+        number === 'jack' ||
+        number === 'queen' ||
+        number === 'king'
+  };
 }
 
 var NUMBER_TYPES = [
@@ -30,13 +37,6 @@ var SUIT_TYPES = [
   'spades',
   'diamonds'
 ];
-
-Card.isFaceCard = function(number) {
-  return number === 'ace' ||
-      number === 'jack' ||
-      number === 'queen' ||
-      number === 'king'
-};
 
 Card.NUMBER_TYPES = NUMBER_TYPES;
 Card.SUIT_TYPES = SUIT_TYPES;
