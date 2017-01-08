@@ -4,9 +4,13 @@ var Pack = require('./pack');
 
 module.exports = class Game {
   constructor(players) {
-    this.players = players;
+    this.players = players || [];
     this.pack = new Pack();
     this.pile = [];
+  }
+
+  numPlayers() {
+    return this.players.length;
   }
 
   deal(handSize) {
