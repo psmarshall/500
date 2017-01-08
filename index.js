@@ -6,6 +6,7 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
 var Game = require('./public/game/game');
+var Player = require('./public/game/player');
 
 var locales = ['en', 'sv'];
 i18n.configure({
@@ -59,22 +60,24 @@ app.get('/', function(req, res){
 io.on('connection', function(socket){
   var locale = socket.handshake.query.locale;
   console.log(socket.handshake.query.locale);
-  //join the room for their locale
+  // Join the room for their locale.
   socket.join(locale);
   socket.on('chat message', function(msg){
     socket.broadcast.emit('chat message', players[socket.id] + ': ' + msg);
   });
 
   socket.on('new user', function(name){
-    //send locale specific messages to each user
+    // Send locale specific messages to each user.
     for (var i = 0; i < locales.length; i++) {
       io.to(locales[i]).emit('chat message', name + ' '
         + i18n.__({phrase: 'has joined the chat', locale: locales[i]}));
     }
     
     console.log(name + ' has connected (' + socket.id + ')');
-    //add the player to the list, then updates everyone's list
-    players[socket.id] = name;
+    // Add the player to the list, then updates everyone's list.
+    var newPlayer = new Player(socket.id, name);
+    players[socket.id] = newPlayer;
+
     io.emit('user list', playersToList(players));
     io.emit('games list', games);
   });
@@ -109,21 +112,15 @@ io.on('connection', function(socket){
 
     io.to('game ' + socket.id).emit('game started', '');
 
-    var cur_game = getGame(socket.id);
-    var num_players = cur_game.players.length;
-    var cur_players = cur_game.players;
+    var curGame = getGame(socket.id);
+    var numPlayers = curGame.numPlayers();
+    var curPlayers = curGame.players;
+
     //deal cards
-    var game = require('./game');
-
-
-
-    var pack = game.createPack();
-    pack = game.shuffle(pack);
-    for (var i = 0; i < num_players; i++) {
-      var hand = game.draw(pack, 5, '', true);
-      io.to(cur_players[i]).emit('hand', hand);
-    }
-    
+    curGame.deal(5);
+    curGame.eachPlayer(function(player) {
+      io.to(player.id).emit('hand', player.hand);
+    });
   });
 
   socket.on('disconnect', function(){
@@ -141,14 +138,14 @@ io.on('connection', function(socket){
     }
 
     //remove user from any games they were in
-    leaveGames(socket);
+    leaveGames(socket.id);
     socket.broadcast.emit('games list', games);
   });
 });
 
 function getGame(hostId) {
   for (var i = 0; i < games.length; i++) {
-    if (games[i].hostId == hostId) {
+    if (games[i].id == hostId) {
       //remove the game if it matches
       return games[i];
     }
@@ -160,9 +157,6 @@ function newGame(socket) {
   // First, leave current game.
   leaveGames(hostId);
   var newGame = new Game(hostId, players[hostId], [hostId]);
-  // var new_game = {   hostId : hostId,
-  //                  host_name : players[hostId],
-  //                    players : [hostId] };
 
   games.push(newGame);
   // Join room for game.
@@ -181,18 +175,17 @@ function deleteGame(hostId) {
 }
 
 //check all games for the player and delete them if they exist
-function leaveGames(socket) {
-  var player_id = socket.id;
+function leaveGames(playerId) {
   for (var i = 0; i < games.length; i++) {
     for (var j = 0; j < games[i].players.length; j++) {
-      if (games[i].players[j] == player_id) {
+      if (games[i].players[j] == playerId) {
         // remove the player
         games[i].players.splice(j,1);
         // remove the player from the room
         socket.leave('game ' + games[i].hostId);
         // If this user was the host, or there are no players left, delete
         // the game
-        if (games[i].players.length == 0 || player_id == games[i].hostId) {
+        if (games[i].players.length == 0 || playerId == games[i].hostId) {
           games.splice(i,1);
         }
         break;
@@ -217,10 +210,10 @@ function joinGame(socket, hostId) {
 
 function playersToList(players) {
   var list = '';
-  for(var key in players) {
-    list += players[key] + ', ';
+  for (let player of players) {
+    list += player.name + ', ';
   }
-  return list.substring(0, list.length -2);
+  return list.substring(0, list.length - 2);
 }
 
 http.listen(3000, function(){

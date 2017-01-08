@@ -20,4 +20,10 @@ module.exports = class Game {
       player.addToHand(this.pack.draw(7));
     }
   }
+
+  eachPlayer(fn) {
+    for (let player of this.players) {
+      fn(player);
+    }
+  }
 }
