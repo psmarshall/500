@@ -8,6 +8,7 @@ describe('Pack', function() {
   describe('create', function() {
     it('has 52 cards', function() {
       var pack = new Pack();
+      
       expect(pack.numCards()).to.equal(52);
     });
   });

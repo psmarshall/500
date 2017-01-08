@@ -22,7 +22,7 @@ describe('Game', function() {
 
     describe('with two players', function() {
       it('should have two players', function() {
-        var game = new Game(['p1', 'p2']);
+        var game = new Game('1', '1', ['p1', 'p2']);
 
         expect(game.numPlayers()).to.equal(2);
       });

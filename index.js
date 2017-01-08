@@ -5,6 +5,8 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
+var Game = require('./public/game/game');
+
 var locales = ['en', 'sv'];
 i18n.configure({
     locales: locales,
@@ -96,8 +98,8 @@ io.on('connection', function(socket){
     io.sockets.emit('games list', games);
   });
 
-  socket.on('join game', function(host_id){
-    joinGame(socket, host_id);
+  socket.on('join game', function(hostId){
+    joinGame(socket, hostId);
     //update all games lists
     io.sockets.emit('games list', games);
   });
@@ -113,9 +115,7 @@ io.on('connection', function(socket){
     //deal cards
     var game = require('./game');
 
-    var Gameclass = require('./public/game/game');
-    var g = new Gameclass();
-    g.standardDeck();
+
 
     var pack = game.createPack();
     pack = game.shuffle(pack);
@@ -146,9 +146,9 @@ io.on('connection', function(socket){
   });
 });
 
-function getGame(host_id) {
+function getGame(hostId) {
   for (var i = 0; i < games.length; i++) {
-    if (games[i].host_id == host_id) {
+    if (games[i].hostId == hostId) {
       //remove the game if it matches
       return games[i];
     }
@@ -156,22 +156,24 @@ function getGame(host_id) {
 }
 
 function newGame(socket) {
-  var host_id = socket.id;
-  //first, leave current game
-  leaveGames(host_id);
-  var new_game = {   host_id : host_id,
-                   host_name : players[host_id],
-                     players : [host_id] };
-  games.push(new_game);
-  // join room for game
-  socket.join('game ' + host_id);
-  return new_game;
+  var hostId = socket.id;
+  // First, leave current game.
+  leaveGames(hostId);
+  var newGame = new Game(hostId, players[hostId], [hostId]);
+  // var new_game = {   hostId : hostId,
+  //                  host_name : players[hostId],
+  //                    players : [hostId] };
+
+  games.push(newGame);
+  // Join room for game.
+  socket.join('game ' + hostId);
+  return newGame;
 }
 
 //delete all games hosted by the player specified
-function deleteGame(host_id) {
+function deleteGame(hostId) {
   for (var i = 0; i < games.length; i++) {
-    if (games[i].host_id == host_id) {
+    if (games[i].hostId == hostId) {
       //remove the game if it matches
       games.splice(i,1);
     }
@@ -187,10 +189,10 @@ function leaveGames(socket) {
         // remove the player
         games[i].players.splice(j,1);
         // remove the player from the room
-        socket.leave('game ' + games[i].host_id);
+        socket.leave('game ' + games[i].hostId);
         // If this user was the host, or there are no players left, delete
         // the game
-        if (games[i].players.length == 0 || player_id == games[i].host_id) {
+        if (games[i].players.length == 0 || player_id == games[i].hostId) {
           games.splice(i,1);
         }
         break;
@@ -199,16 +201,16 @@ function leaveGames(socket) {
   }
 }
 
-function joinGame(socket, host_id) {
+function joinGame(socket, hostId) {
   var player_id = socket.id;
   // first, leave current game
   leaveGames(player_id);
   for (var i = 0; i < games.length; i++) {
-    if (games[i].host_id == host_id) {
+    if (games[i].hostId == hostId) {
       // add the player to the game
       games[i].players.push(player_id);
       // add the player to the associated room
-      socket.join('game ' + host_id);
+      socket.join('game ' + hostId);
     }
   }
 }
