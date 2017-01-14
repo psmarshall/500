@@ -34,7 +34,7 @@ function render(hand) {
   var ypos = canvas.height - cardHeight - gapHeight;
   for (let i = 0; i < hand.length; i++) {
     let card = new Image();
-    card.src = 'images/' + hand[i] + '.svg';
+    card.src = 'images/' + hand[i].imagePath + '.svg';
     card.onload = function() {
       var xpos = (i + 1) * 20 + i * cardWidth;
       context.drawImage(card, xpos, ypos, cardWidth, cardHeight);
