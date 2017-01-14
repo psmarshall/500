@@ -98,7 +98,8 @@ socket.on('user list', function(list){
 socket.on('games list', function(games){
   //clear old list
   $('#gamesList').empty();
-  $.each(games, function(key, game) {
+  for (var gameId in games) {
+    var game = games[gameId];
     var num_players = game.players.length;
     var list_item = $('<li>').text(game.hostName
         + ' (' + num_players + ' players)');
@@ -124,7 +125,7 @@ socket.on('games list', function(games){
       list_item.append(start_button);
     }
     $('#gamesList').append(list_item);
-  });
+  };
 });
 
 // handle game starting

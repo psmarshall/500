@@ -24,7 +24,7 @@ app.use(cookieParser());
 
 var players = [];
 var typing = [];
-var games = [];
+var games = {};
 /*
 console.log(hand);
 
@@ -98,13 +98,15 @@ io.on('connection', function(socket){
   socket.on('new game', function(msg){
     newGame(socket);
     console.log('Done new game.');
-    console.log(games);
     //update all games lists
     io.sockets.emit('games list', games);
+
+    console.log("sent games: ");
+    console.log(games);
   });
 
   socket.on('join game', function(hostId) {
-    var game = getGame(hostId);
+    var game = games[hostId];
     game.addPlayer(players[socket.id]);
     socket.join('game ' + hostId);
     // Update all games lists.
@@ -116,7 +118,7 @@ io.on('connection', function(socket){
 
     io.to('game ' + socket.id).emit('game started', '');
 
-    var curGame = getGame(socket.id);
+    var curGame = games[socket.id];
 
     // Deal cards.
     curGame.deal(5);
@@ -140,58 +142,37 @@ io.on('connection', function(socket){
     }
 
     // Remove user from any games they were in.
-    // leaveGames(socket.id);
+    leaveGames(socket.id);
     socket.broadcast.emit('games list', games);
   });
 });
 
-function getGame(hostId) {
-  for (var i = 0; i < games.length; i++) {
-    if (games[i].id == hostId) {
-      //remove the game if it matches
-      return games[i];
-    }
-  }
-}
-
 function newGame(socket) {
   var hostId = socket.id;
   // First, leave current game.
-  // leaveGames(hostId);
+  leaveGames(hostId);
   var newGame = new Game(hostId, players[hostId].name, [players[hostId]]);
-
-  games.push(newGame);
+  games[hostId] = newGame;
   // Join room for game.
   socket.join('game ' + hostId);
   return newGame;
 }
 
-//delete all games hosted by the player specified
+// Delete the game hosted by the player.
 function deleteGame(hostId) {
-  for (var i = 0; i < games.length; i++) {
-    if (games[i].hostId == hostId) {
-      //remove the game if it matches
-      games.splice(i,1);
-    }
-  }
+  delete games[hostId];
 }
 
-//check all games for the player and delete them if they exist
+// Check all games for the player and delete them if they exist.
 function leaveGames(playerId) {
-  for (var i = 0; i < games.length; i++) {
-    for (var j = 0; j < games[i].players.length; j++) {
-      if (games[i].players[j] == playerId) {
-        // remove the player
-        games[i].players.splice(j,1);
-        // remove the player from the room
-        socket.leave('game ' + games[i].hostId);
-        // If this user was the host, or there are no players left, delete
-        // the game
-        if (games[i].players.length == 0 || playerId == games[i].hostId) {
-          games.splice(i,1);
-        }
-        break;
-      }
+  var player = players[playerId];
+  for (let game in games) {
+    game.removePlayer(player);
+    // Remove the player from the room.
+    socket.leave('game ' + game.id);
+
+    if (game.numPlayers() === 0 || playerId === game.id) {
+      delete games[playerId];
     }
   }
 }
