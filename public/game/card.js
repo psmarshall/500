@@ -8,11 +8,8 @@ class Card {
   }
 
   static isFaceCard(number) {
-    return number === 'ace' ||
-        number === 'jack' ||
-        number === 'queen' ||
-        number === 'king'
-  };
+    return ['jack', 'queen', 'king'].includes(number);
+  }
 }
 
 var NUMBER_TYPES = [

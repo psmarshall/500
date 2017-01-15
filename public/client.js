@@ -1,7 +1,7 @@
 var socket = io({query: 'locale=' + $.cookie('500_language')});
 //handle user entering their name
 $('#chooseNameForm').submit(function(){
-  if ($('#name').val() != "") {
+  if ($('#name').val() !== "") {
     socket.emit('new user', $('#name').val());
     $('#content').show(400);
     $('#chooseNameDiv').hide();
@@ -38,7 +38,7 @@ function render(hand) {
     card.onload = function() {
       var xpos = (i + 1) * 20 + i * cardWidth;
       context.drawImage(card, xpos, ypos, cardWidth, cardHeight);
-    }
+    };
   }
 }
 
@@ -78,7 +78,7 @@ socket.on('chat message', function(msg){
   $('#messages').append($('<li>').text(msg));
   //make sure chat window scrolls automatically
   $('.panel-body').scrollTop($('.panel-body')[0].scrollHeight);
-  if (!document.hasFocus() && interval == null) {
+  if (!document.hasFocus() && interval === null) {
     interval = setInterval(changeTitle, 850);
   }
 });
@@ -101,8 +101,8 @@ socket.on('games list', function(games){
   for (var gameId in games) {
     var game = games[gameId];
     var num_players = game.players.length;
-    var list_item = $('<li>').text(game.hostName
-        + ' (' + num_players + ' players)');
+    var list_item = $('<li>').text(game.hostName +
+        ' (' + num_players + ' players)');
     //add a join button, if it is not their game and they aren't already in it
     if (game.id != socket.io.engine.id) {
       if ($.inArray(socket.io.engine.id, game.players) == -1) {
@@ -125,7 +125,7 @@ socket.on('games list', function(games){
       list_item.append(start_button);
     }
     $('#gamesList').append(list_item);
-  };
+  }
 });
 
 // handle game starting

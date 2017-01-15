@@ -10,4 +10,4 @@ module.exports = class Player {
   addToHand(cards) {
     this.hand.push(...cards);
   }
-}
+};

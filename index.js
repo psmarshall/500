@@ -1,5 +1,5 @@
 var express = require('express');
-var i18n = i18n = require('i18n');
+var i18n = require('i18n');
 var cookieParser = require('cookie-parser');
 var app = express();
 var http = require('http').Server(app);
@@ -25,22 +25,10 @@ app.use(cookieParser());
 var players = [];
 var typing = [];
 var games = {};
-/*
-console.log(hand);
-
-game.draw(pack, 1, hand);
-console.log(hand); 
-
-game.draw(pack, 2, hand);
-console.log(hand); 
-
-game.playCard(1, hand, hand.length-1); 
-console.log(hand); 
-*/
 
 app.get('/', function(req, res){
   var loc = req.cookies['500_language'];
-  if (loc == null) {
+  if (loc === null) {
     loc = 'en';
   }
   res.cookie('500_language', loc, { maxAge: 365*24*60*60*1000 });
@@ -69,8 +57,8 @@ io.on('connection', function(socket){
   socket.on('new user', function(name){
     // Send locale specific messages to each user.
     for (var i = 0; i < locales.length; i++) {
-      io.to(locales[i]).emit('chat message', name + ' '
-        + i18n.__({phrase: 'has joined the chat', locale: locales[i]}));
+      io.to(locales[i]).emit('chat message', name + ' ' +
+        i18n.__({phrase: 'has joined the chat', locale: locales[i]}));
     }
     
     console.log(name + ' has connected (' + socket.id + ')');
@@ -131,8 +119,8 @@ io.on('connection', function(socket){
     console.log('User disconnected (' + socket.id + ')');
     //send locale specific messages to each user
     for (var i = 0; i < locales.length; i++) {
-      io.to(locales[i]).emit('chat message', players[socket.id] + ' '
-        + i18n.__({phrase: 'has left the chat', locale: locales[i]}));
+      io.to(locales[i]).emit('chat message', players[socket.id] + ' ' +
+        i18n.__({phrase: 'has left the chat', locale: locales[i]}));
     }
     //remove the user, then update everyone's list
     delete players[socket.id];
