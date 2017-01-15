@@ -21,7 +21,7 @@ describe('Pack', function() {
 
       expect(pack.numCards()).to.equal(initialNumCards);
     });
-  })
+  });
 
   describe('draw', function() {
     describe('one card', function() {
