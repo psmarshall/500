@@ -24,7 +24,7 @@ app.use(cookieParser());
 
 var players = [];
 var typing = [];
-var games = {};
+var games = new Map();
 
 app.get('/', function(req, res){
   var loc = req.cookies['500_language'];
@@ -67,7 +67,7 @@ io.on('connection', function(socket){
     players[socket.id] = newPlayer;
 
     io.emit('user list', playersToList(players));
-    io.emit('games list', games);
+    io.emit('games list', Array.from(games));
   });
 
   socket.on('start typing', function(msg){
@@ -80,25 +80,28 @@ io.on('connection', function(socket){
   });
 
   socket.on('get games', function(msg){
-    socket.emit('games list', games);
+    socket.emit('games list', Array.from(games));
   });
 
   socket.on('new game', function(msg){
     newGame(socket);
-    console.log('Done new game.');
     //update all games lists
-    io.sockets.emit('games list', games);
-
-    console.log("sent games: ");
-    console.log(games);
+    io.sockets.emit('games list', Array.from(games));
+    console.log("sent games: ", games);
   });
 
   socket.on('join game', function(hostId) {
-    var game = games[hostId];
+    var game = games.get(hostId);
     game.addPlayer(players[socket.id]);
     socket.join('game ' + hostId);
     // Update all games lists.
-    io.sockets.emit('games list', games);
+    io.sockets.emit('games list', Array.from(games));
+  });
+
+  socket.on('map', function(msg) {
+    var map = new Map();
+    map.set('abc', 123);
+    socket.emit('map here', map);
   });
 
   socket.on('start game', function(msg){
@@ -106,7 +109,7 @@ io.on('connection', function(socket){
 
     io.to('game ' + socket.id).emit('game started', '');
 
-    var curGame = games[socket.id];
+    var curGame = games.get(socket.id);
 
     // Deal cards.
     curGame.deal(5);
@@ -123,24 +126,23 @@ io.on('connection', function(socket){
         i18n.__({phrase: 'has left the chat', locale: locales[i]}));
     }
     //remove the user, then update everyone's list
+    leaveGames(socket);
     delete players[socket.id];
     socket.broadcast.emit('user list', playersToList(players));
-    for(var key in players) {
+    for (var key in players) {
       console.log('Remaining players: ' + key + ': ' + players[key]);
     }
 
-    // Remove user from any games they were in.
-    leaveGames(socket.id);
-    socket.broadcast.emit('games list', games);
+    socket.broadcast.emit('games list', Array.from(games));
   });
 });
 
 function newGame(socket) {
   var hostId = socket.id;
   // First, leave current game.
-  leaveGames(hostId);
+  leaveGames(socket);
   var newGame = new Game(hostId, players[hostId].name, [players[hostId]]);
-  games[hostId] = newGame;
+  games.set(hostId, newGame);
   // Join room for game.
   socket.join('game ' + hostId);
   return newGame;
@@ -148,19 +150,19 @@ function newGame(socket) {
 
 // Delete the game hosted by the player.
 function deleteGame(hostId) {
-  delete games[hostId];
+  games.delete(hostId);
 }
 
 // Check all games for the player and delete them if they exist.
-function leaveGames(playerId) {
-  var player = players[playerId];
-  for (let game in games) {
+function leaveGames(socket) {
+  var player = players[socket.id];
+  for (var [gameId, game] of games) {
     game.removePlayer(player);
     // Remove the player from the room.
-    socket.leave('game ' + game.id);
+    if (socket) socket.leave('game ' + game.id);
 
-    if (game.numPlayers() === 0 || playerId === game.id) {
-      delete games[playerId];
+    if (game.numPlayers() === 0 || socket.id === game.id) {
+      games.delete(socket.id);
     }
   }
 }

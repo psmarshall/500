@@ -73,6 +73,12 @@ $(window).focus(function () {
   $('title').text(oldTitle);
 });
 
+socket.emit('map', '');
+
+socket.on('map here', function(map) {
+  console.log(map);
+});
+
 //handle receiving a message
 socket.on('chat message', function(msg){
   $('#messages').append($('<li>').text(msg));
@@ -98,8 +104,7 @@ socket.on('user list', function(list){
 socket.on('games list', function(games){
   //clear old list
   $('#gamesList').empty();
-  for (var gameId in games) {
-    var game = games[gameId];
+  for (var [gameId, game] of new Map(games)) {
     var num_players = game.players.length;
     var list_item = $('<li>').text(game.hostName +
         ' (' + num_players + ' players)');

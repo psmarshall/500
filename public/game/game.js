@@ -26,4 +26,8 @@ module.exports = class Game {
       fn(player);
     }
   }
+
+  removePlayer(player) {
+    console.log(this.players);
+  }
 };
