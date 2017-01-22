@@ -98,12 +98,6 @@ io.on('connection', function(socket){
     io.sockets.emit('games list', Array.from(games));
   });
 
-  socket.on('map', function(msg) {
-    var map = new Map();
-    map.set('abc', 123);
-    socket.emit('map here', map);
-  });
-
   socket.on('start game', function(msg){
     console.log('start game: ' + socket.id);
 
@@ -141,7 +135,7 @@ function newGame(socket) {
   var hostId = socket.id;
   // First, leave current game.
   leaveGames(socket);
-  var newGame = new Game(hostId, players[hostId].name, [players[hostId]]);
+  var newGame = new Game(hostId, players[hostId].name, new Set([players[hostId]]));
   games.set(hostId, newGame);
   // Join room for game.
   socket.join('game ' + hostId);

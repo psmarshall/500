@@ -28,6 +28,12 @@ $("#canvas").dblclick(function(event) {
   console.log('x: ' + mouseX + ', y: ' + mouseY);
 });
 
+function drawCardImage(card, xpos, ypos) {
+  return function() {
+    context.drawImage(card, xpos, ypos, cardWidth, cardHeight);
+  };
+}
+
 function render(hand) {
   canvas.width = $("#content").width();
   context.clearRect(0, 0, canvas.width, canvas.height);
@@ -35,10 +41,8 @@ function render(hand) {
   for (let i = 0; i < hand.length; i++) {
     let card = new Image();
     card.src = 'images/' + hand[i].imagePath + '.svg';
-    card.onload = function() {
-      var xpos = (i + 1) * 20 + i * cardWidth;
-      context.drawImage(card, xpos, ypos, cardWidth, cardHeight);
-    };
+    var xpos = (i + 1) * 20 + i * cardWidth;
+    card.onload = drawCardImage(card, xpos, ypos);
   }
 }
 
@@ -73,12 +77,6 @@ $(window).focus(function () {
   $('title').text(oldTitle);
 });
 
-socket.emit('map', '');
-
-socket.on('map here', function(map) {
-  console.log(map);
-});
-
 //handle receiving a message
 socket.on('chat message', function(msg){
   $('#messages').append($('<li>').text(msg));
@@ -100,11 +98,20 @@ $('#m').on('keyup', function() {
 socket.on('user list', function(list){
   $('#userList').text(list);
 });
+
+function joinGame(game) {
+  return function() { socket.emit('join game', game.id); };
+}
+
+function startGame() {
+  socket.emit('start game', '');
+}
+
 //handle receiving a games list
 socket.on('games list', function(games){
   //clear old list
   $('#gamesList').empty();
-  for (var [gameId, game] of new Map(games)) {
+  for (let [gameId, game] of new Map(games)) {
     var num_players = game.players.length;
     var list_item = $('<li>').text(game.hostName +
         ' (' + num_players + ' players)');
@@ -112,9 +119,7 @@ socket.on('games list', function(games){
     if (game.id != socket.io.engine.id) {
       if ($.inArray(socket.io.engine.id, game.players) == -1) {
         var join_button = $('<a>').text('Join').addClass('btn btn-primary btn-sm btn-margin-left');
-        join_button.click(function() {
-          socket.emit('join game', game.hostId);
-        });
+        join_button.click(joinGame(game));
         list_item.append(join_button);
       } else {
         //they are in this game
@@ -124,9 +129,7 @@ socket.on('games list', function(games){
       //they are in this game && are host
       list_item.addClass('current-game');
       var start_button = $('<a>').text('Start').addClass('btn btn-primary btn-sm btn-margin-left');
-      start_button.click(function(){
-        socket.emit('start game', '');
-      });
+      start_button.click(startGame);
       list_item.append(start_button);
     }
     $('#gamesList').append(list_item);

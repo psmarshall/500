@@ -6,18 +6,18 @@ module.exports = class Game {
   constructor(id, hostName, players) {
     this.id = id;
     this.hostName = hostName;
-    this.players = players || [];
+    this.players = players || new Set();
     this.pack = new Pack();
     this.pile = [];
   }
 
   numPlayers() {
-    return this.players.length;
+    return this.players.size;
   }
 
   deal(handSize) {
     for (let player of this.players) {
-      player.addToHand(this.pack.draw(7));
+      player.addToHand(this.pack.draw(handSize));
     }
   }
 
@@ -27,7 +27,11 @@ module.exports = class Game {
     }
   }
 
+  addPlayer(player) {
+    this.players.add(player);
+  }
+
   removePlayer(player) {
-    console.log(this.players);
+    this.players.delete(player);
   }
 };
