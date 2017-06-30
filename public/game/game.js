@@ -3,10 +3,10 @@
 var Pack = require('./pack');
 
 module.exports = class Game {
-  constructor(id, hostName, players) {
+  constructor(id, hostName, players = new Set()) {
     this.id = id;
     this.hostName = hostName;
-    this.players = players || new Set();
+    this.players = players;
     this.pack = new Pack();
     this.pile = [];
   }

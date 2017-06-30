@@ -161,6 +161,10 @@ function leaveGames(socket) {
   }
 }
 
+function emitGames() {
+  
+}
+
 function playersToList(players) {
   var list = '';
   for (let player of players) {
