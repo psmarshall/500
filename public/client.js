@@ -112,12 +112,14 @@ socket.on('games list', function(games){
   //clear old list
   $('#gamesList').empty();
   for (let [gameId, game] of new Map(games)) {
-    var num_players = game.players.length;
+    var players = new Set(game.players);
+    var num_players = players.size;
     var list_item = $('<li>').text(game.hostName +
         ' (' + num_players + ' players)');
     //add a join button, if it is not their game and they aren't already in it
     if (game.id != socket.io.engine.id) {
-      if ($.inArray(socket.io.engine.id, game.players) == -1) {
+      if ($.inArray(socket.io.engine.id, players) == -1) {
+        // TODO i18n the join text
         var join_button = $('<a>').text('Join').addClass('btn btn-primary btn-sm btn-margin-left');
         join_button.click(joinGame(game));
         list_item.append(join_button);
@@ -128,7 +130,7 @@ socket.on('games list', function(games){
     } else {
       //they are in this game && are host
       list_item.addClass('current-game');
-      var start_button = $('<a>').text('Start').addClass('btn btn-primary btn-sm btn-margin-left');
+      var start_button = $('<a>').text($("#start")[0].innerText).addClass('btn btn-primary btn-sm btn-margin-left');
       start_button.click(startGame);
       list_item.append(start_button);
     }

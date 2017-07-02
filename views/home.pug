@@ -19,18 +19,23 @@ html
             label.btn.btn-primary.active English
           else
             label.btn.btn-primary English
-              input#en(type="radio", name="languageOptions", autocomplete="off", checked) 
+              input#en(type="radio", name="languageOptions", autocomplete="off")
           if locale == 'sv'
             label.btn.btn-primary.active Svenska
           else
             label.btn.btn-primary Svenska
-              input#sv(type="radio", name="languageOptions", autocomplete="off") 
+              input#sv(type="radio", name="languageOptions", autocomplete="off")
+          if locale == 'de'
+            label.btn.btn-primary.active Deutsch
+          else
+            label.btn.btn-primary Deutsch
+              input#de(type="radio", name="languageOptions", autocomplete="off") 
       div#chooseNameDiv
         form.form-inline(role="form", id="chooseNameForm")
           div.form-group
             label(for="name", id="nameLabel") #{__('Name')}: 
             input.form-control(type="text", id="name", placeholder="Sven")
-          button.btn.btn-default(type="submit") #{__('Start')}
+          button.btn.btn-default(type="submit", id="start") #{__('Start')}
       div#content(style="display: none;")
         div#lobby.panel.panel-default
           ul#gamesList.list-plain

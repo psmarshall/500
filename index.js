@@ -8,7 +8,7 @@ var io = require('socket.io')(http);
 var Game = require('./public/game/game');
 var Player = require('./public/game/player');
 
-var locales = ['en', 'sv'];
+var locales = ['en', 'sv', 'de'];
 i18n.configure({
     locales: locales,
     defaultLocale: 'en',
@@ -67,7 +67,7 @@ io.on('connection', function(socket){
     players[socket.id] = newPlayer;
 
     io.emit('user list', playersToList(players));
-    io.emit('games list', Array.from(games));
+    emitGames(io, games);
   });
 
   socket.on('start typing', function(msg){
@@ -80,13 +80,13 @@ io.on('connection', function(socket){
   });
 
   socket.on('get games', function(msg){
-    socket.emit('games list', Array.from(games));
+    emitGames(socket, games);
   });
 
   socket.on('new game', function(msg){
     newGame(socket);
     //update all games lists
-    io.sockets.emit('games list', Array.from(games));
+    emitGames(io.sockets, games);
     console.log("sent games: ", games);
   });
 
@@ -95,7 +95,7 @@ io.on('connection', function(socket){
     game.addPlayer(players[socket.id]);
     socket.join('game ' + hostId);
     // Update all games lists.
-    io.sockets.emit('games list', Array.from(games));
+    emitGames(io.sockets, games);
   });
 
   socket.on('start game', function(msg){
@@ -114,20 +114,22 @@ io.on('connection', function(socket){
 
   socket.on('disconnect', function(){
     console.log('User disconnected (' + socket.id + ')');
-    //send locale specific messages to each user
-    for (var i = 0; i < locales.length; i++) {
-      io.to(locales[i]).emit('chat message', players[socket.id] + ' ' +
-        i18n.__({phrase: 'has left the chat', locale: locales[i]}));
+    // The user may not have entered a name yet
+    if (players[socket.id] !== undefined) {
+        // Send locale specific messages to each user
+      for (var i = 0; i < locales.length; i++) {
+        io.to(locales[i]).emit('chat message', players[socket.id].name + ' ' +
+          i18n.__({phrase: 'has left the chat', locale: locales[i]}));
+      }
+      //remove the user, then update everyone's list
+      leaveGames(socket);
+      delete players[socket.id];
+      socket.broadcast.emit('user list', playersToList(players));
+      for (var key in players) {
+        console.log('Remaining players: ' + key + ': ' + players[key]);
+      }
+      emitGames(socket.broadcast, games);
     }
-    //remove the user, then update everyone's list
-    leaveGames(socket);
-    delete players[socket.id];
-    socket.broadcast.emit('user list', playersToList(players));
-    for (var key in players) {
-      console.log('Remaining players: ' + key + ': ' + players[key]);
-    }
-
-    socket.broadcast.emit('games list', Array.from(games));
   });
 });
 
@@ -161,8 +163,15 @@ function leaveGames(socket) {
   }
 }
 
-function emitGames() {
-  
+// Make sure games is JSON representable and then emit it.
+function emitGames(destination, games) {
+  games.forEach((game) => {
+    game.players = Array.from(game.players);
+  });
+  destination.emit('games list', Array.from(games));
+  games.forEach((game) => {
+    game.players = new Set(game.players);
+  });
 }
 
 function playersToList(players) {
