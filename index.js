@@ -9,6 +9,7 @@ var Game = require('./public/game/game');
 var Player = require('./public/game/player');
 
 var locales = ['en', 'sv', 'de'];
+var locale_names = ['English', 'Svenska', 'Deutsch'];
 i18n.configure({
     locales: locales,
     defaultLocale: 'en',
@@ -41,7 +42,9 @@ app.get('/', function(req, res){
           'https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js',
           '/client.js',
           'http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js'],
-    locale: loc
+    locales: locales,
+    locale_names: locale_names,
+    currentLocale: loc
   });
 });
 

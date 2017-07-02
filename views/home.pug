@@ -15,21 +15,12 @@ html
 
         p #{__('Welcome to')} 500
         div.btn-group(data-toggle="buttons")
-          if locale == 'en'
-            label.btn.btn-primary.active English
-          else
-            label.btn.btn-primary English
-              input#en(type="radio", name="languageOptions", autocomplete="off")
-          if locale == 'sv'
-            label.btn.btn-primary.active Svenska
-          else
-            label.btn.btn-primary Svenska
-              input#sv(type="radio", name="languageOptions", autocomplete="off")
-          if locale == 'de'
-            label.btn.btn-primary.active Deutsch
-          else
-            label.btn.btn-primary Deutsch
-              input#de(type="radio", name="languageOptions", autocomplete="off") 
+          each locale, index in locales
+            if locale == currentLocale
+              label.btn.btn-primary.active #{locale_names[index]}
+            else
+              label.btn.btn-primary #{locale_names[index]}
+                input(type="radio", name="languageOptions", id= locale, autocomplete="off")
       div#chooseNameDiv
         form.form-inline(role="form", id="chooseNameForm")
           div.form-group
