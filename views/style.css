@@ -23,11 +23,8 @@
 #messages li { padding: 5px 10px; }
 /* #messages li:nth-child(odd) { background: #eee; } */
 
-#hand {
-	position: relative;
-}
 .card {
-	width:150px;
+	width:130px;
 }
 .card-placeholder {
 	background-color: gray;
@@ -37,11 +34,29 @@
 	float: left;
 	position: absolute;
 }
-.clearfix:after { 
+.clearfix:after {
    content: " ";
-   display: block; 
-   height: 0; 
+   display: block;
+   height: 0;
    clear: both;
+}
+
+#game {
+	margin-top: 40px;
+}
+
+#middle {
+	display: flex;
+  justify-content: space-evenly;
+}
+
+#hand {
+	display: flex;
+	margin-top: 20px;
+}
+
+#chat {
+	margin-top: 20px;
 }
 
 @media(max-width:767px){

@@ -118,6 +118,24 @@ io.on('connection', function(socket){
     });
   });
 
+  socket.on('pick up from pack', () => {
+    let gameId;
+    for (const game of games.values()) {
+      if (game.hasPlayer(players[socket.id])) {
+        gameId = game.id;
+        break;
+      }
+    }
+    // TODO Handle error.
+
+    // Trusting client here.
+    const curGame = games.get(gameId);
+    curGame.pickUpFromPack(players[socket.id]);
+    curGame.eachPlayer((player, gameState) => {
+      io.to(player.id).emit('gameState', gameState);
+    });
+  });
+
   socket.on('disconnect', function(){
     console.log('User disconnected (' + socket.id + ')');
     // The user may not have entered a name yet
@@ -143,7 +161,7 @@ function newGame(socket) {
   var hostId = socket.id;
   // First, leave current game.
   leaveGames(socket);
-  var newGame = new Game(hostId, players[hostId].name, new Set([players[hostId]]));
+  var newGame = new Game(hostId, players[hostId].name, [players[hostId]]);
   games.set(hostId, newGame);
   // Join room for game.
   socket.join('game ' + hostId);
@@ -169,15 +187,9 @@ function leaveGames(socket) {
   }
 }
 
-// Make sure games is JSON representable and then emit it.
+// Can probably get rid of this now that games are not a Set.
 function emitGames(destination, games) {
-  games.forEach((game) => {
-    game.players = Array.from(game.players);
-  });
   destination.emit('games list', Array.from(games));
-  games.forEach((game) => {
-    game.players = new Set(game.players);
-  });
 }
 
 function playersToList(players) {

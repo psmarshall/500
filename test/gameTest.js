@@ -23,7 +23,7 @@ describe('Game', function() {
 
     describe('with two players', function() {
       it('should have two players', function() {
-        var game = new Game('1', '1', new Set(['p1', 'p2']));
+        var game = new Game('1', '1', ['p1', 'p2']);
 
         expect(game.numPlayers()).to.equal(2);
       });
@@ -43,10 +43,9 @@ describe('Game', function() {
 
   describe('remove player', function() {
     it('reduces player count by 1', function() {
-      var p2 = 'p2';
-      var game = new Game('1', '1', new Set(['p1', p2]));
+      var game = new Game('1', '1', ['p1', { id: 'p2' }]);
 
-      game.removePlayer(p2);
+      game.removePlayer({ id: 'p2' });
 
       expect(game.numPlayers()).to.equal(1);
     });
@@ -57,7 +56,7 @@ describe('Game', function() {
       it('does nothing to players\' hands', function() {
         var p1 = new Player('123', 'Sam');
         var p2 = new Player('456', 'Charlie');
-        var game = new Game('123', 'Sam', new Set([p1, p2]));
+        var game = new Game('123', 'Sam', [p1, p2]);
 
         game.deal(0);
 
@@ -70,7 +69,7 @@ describe('Game', function() {
       it('increases each players\' hand size to 7', function() {
         var p1 = new Player('123', 'Sam');
         var p2 = new Player('456', 'Charlie');
-        var game = new Game('123', 'Sam', new Set([p1, p2]));
+        var game = new Game('123', 'Sam', [p1, p2]);
 
         game.deal(7);
 

@@ -9,44 +9,41 @@ $('#chooseNameForm').submit(function(){
   return false;
 });
 
-// Canvas stuff.
-var canvas = document.createElement("canvas");
-var context = canvas.getContext("2d");
-canvas.width = $("#chooseNameDiv").width();
-canvas.height = 512;
-$('#canvas')[0].appendChild(canvas);
-
-var gapWidth = 20;
-var gapHeight = 20;
-var handSize = 5;
-var cardWidth = (canvas.width - ((handSize + 1) * 20)) / handSize;
-var cardHeight = 1.4523 * cardWidth;
-
-$("#canvas").dblclick(function(event) {
-  mouseX = event.pageX - this.offsetLeft;
-  mouseY = event.pageY - this.offsetTop;
-  console.log('x: ' + mouseX + ', y: ' + mouseY);
-});
-
 function render(gameState) {
   const { hand, numInPack, numInPile, topOfPile } = gameState;
 
-  canvas.width = $("#content").width();
-  context.clearRect(0, 0, canvas.width, canvas.height);
-
   // Draw the pile and pack.
-  context.fillText(`Pile: ${numInPile} top: ${topOfPile.number} of ${topOfPile.suit}`, 20, 20);
-  context.fillText('Pack: ' + numInPack, 20, 40);
+  const pile = document.getElementById('pile');
+  pile.src = 'images/' + topOfPile.imagePath + '.svg';
+
+  const pack = document.getElementById('pack');
+  pack.src = 'images/card_back.svg';
 
   // Draw players' hand.
-  const ypos = canvas.height - cardHeight - gapHeight;
-  for (let i = 0; i < hand.length; i++) {
-    const card = new Image();
-    card.src = 'images/' + hand[i].imagePath + '.svg';
-    const xpos = (i + 1) * 20 + i * cardWidth;
-    card.onload = () => context.drawImage(card, xpos, ypos, cardWidth, cardHeight);
+  const handDiv = document.getElementById('hand');
+  handDiv.innerHTML = '';
+
+  for (const card of hand) {
+    const cardImg = document.createElement('img');
+    cardImg.src = 'images/' + card.imagePath + '.svg';
+    cardImg.className = 'card';
+    handDiv.append(cardImg);
   }
 }
+
+const turnState = {
+  myTurn: false,
+  havePickedUp: false,
+}
+
+$('#pack').click(() => {
+  if (!turnState.myTurn || turnState.havePickedUp) {
+    return;
+  }
+  // TODO: Handle empty pack.
+  socket.emit('pick up from pack', '');
+  turnState.havePickedUp = true;
+});
 
 //handle send message
 $('#chatForm').submit(function(){
@@ -143,12 +140,14 @@ socket.on('games list', function(games){
 // handle game starting
 socket.on('game started', function(msg){
   $('#lobby').hide();
+  $('.jumbotron').hide();
   $('#game').show(400);
 });
 
 // Handle update of gameState e.g. cards in hand
 socket.on('gameState', function(gameState){
   render(gameState);
+  turnState.myTurn = gameState.myTurn;
 });
 
 //respond to typing events from other users
