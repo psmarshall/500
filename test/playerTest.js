@@ -1,7 +1,7 @@
-var Player = require('../public/game/player');
-var chai = require('chai');
+import { Player } from '../public/game/player.js';
+import * as chai from 'chai';
 
-var expect = chai.expect;
+const expect = chai.expect;
 
 describe('player', function() {
   describe('create', function() {

@@ -1,8 +1,6 @@
-'use strict';
+import { Card } from './card.js';
 
-var Card = require('./card');
-
-class Pack {
+export class Pack {
   constructor() {
     this.pack = standardPack();
     this.shuffle();
@@ -50,5 +48,3 @@ function standardPack() {
   }
   return pack;
 }
-
-module.exports = Pack;

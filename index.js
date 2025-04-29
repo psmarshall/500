@@ -33,7 +33,7 @@ app.get('/', function(req, res){
     loc = 'en';
   }
   res.cookie('500_language', loc, { maxAge: 365*24*60*60*1000 });
-  req.setLocale(loc);
+  // req.setLocale(loc);
   res.render('home', {
     title: 'Welcome',
     scripts: ['/socket.io/socket.io.js',
@@ -63,7 +63,7 @@ io.on('connection', function(socket){
       io.to(locales[i]).emit('chat message', name + ' ' +
         i18n.__({phrase: 'has joined the chat', locale: locales[i]}));
     }
-    
+
     console.log(name + ' has connected (' + socket.id + ')');
     // Add the player to the list, then updates everyone's list.
     var newPlayer = new Player(socket.id, name);

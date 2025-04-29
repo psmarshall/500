@@ -107,28 +107,28 @@ function startGame() {
   socket.emit('start game', '');
 }
 
-//handle receiving a games list
+// Handle receiving a games list
 socket.on('games list', function(games){
-  //clear old list
+  // Clear old list
   $('#gamesList').empty();
   for (let [gameId, game] of new Map(games)) {
-    var players = new Set(game.players);
-    var num_players = players.size;
-    var list_item = $('<li>').text(game.hostName +
+    const num_players = game.players.length;
+    const list_item = $('<li>').text(game.hostName +
         ' (' + num_players + ' players)');
-    //add a join button, if it is not their game and they aren't already in it
-    if (game.id != socket.io.engine.id) {
-      if ($.inArray(socket.io.engine.id, players) == -1) {
+    const myPlayerId = socket.id;
+    // If it is not their game and they aren't already in it
+    if (game.id !== myPlayerId) {
+      if (!game.players.find(p => p.id === myPlayerId)) {
         // TODO i18n the join text
         var join_button = $('<a>').text('Join').addClass('btn btn-primary btn-sm btn-margin-left');
         join_button.click(joinGame(game));
         list_item.append(join_button);
       } else {
-        //they are in this game
+        // They are in this game
         list_item.addClass('current-game');
       }
     } else {
-      //they are in this game && are host
+      // They are in this game and are the host
       list_item.addClass('current-game');
       var start_button = $('<a>').text($("#start")[0].innerText).addClass('btn btn-primary btn-sm btn-margin-left');
       start_button.click(startGame);
@@ -168,5 +168,5 @@ $("input[name=languageOptions]").change(function () {
   console.log($(this).attr('id'));
   console.log('old cookie: ' + $.cookie('500_language'));
   $.cookie('500_language', $(this).attr('id'), { expires : 365 });
-  window.location.reload(true); 
+  window.location.reload(true);
 });

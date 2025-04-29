@@ -1,14 +1,14 @@
-var Pack = require('../public/game/pack');
-var chai = require('chai');
+import { Pack } from '../public/game/pack.js';
+import * as chai from 'chai';
 
 chai.should();
-var expect = chai.expect;
+const expect = chai.expect;
 
 describe('Pack', function() {
   describe('create', function() {
     it('has 52 cards', function() {
       var pack = new Pack();
-      
+
       expect(pack.numCards()).to.equal(52);
     });
   });

@@ -1,6 +1,6 @@
-var Game = require('../public/game/game');
-var Player = require('../public/game/player');
-var chai = require('chai');
+import { Game } from '../public/game/game.js';
+import { Player } from '../public/game/player.js';
+import * as chai from 'chai';
 
 chai.should();
 var expect = chai.expect;

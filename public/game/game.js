@@ -1,8 +1,6 @@
-'use strict';
+import { Pack } from './pack.js';
 
-var Pack = require('./pack');
-
-module.exports = class Game {
+export class Game {
   constructor(id, hostName, players = new Set()) {
     this.id = id;
     this.hostName = hostName;
