@@ -28,21 +28,23 @@ $("#canvas").dblclick(function(event) {
   console.log('x: ' + mouseX + ', y: ' + mouseY);
 });
 
-function drawCardImage(card, xpos, ypos) {
-  return function() {
-    context.drawImage(card, xpos, ypos, cardWidth, cardHeight);
-  };
-}
+function render(gameState) {
+  const { hand, numInPack, numInPile, topOfPile } = gameState;
 
-function render(hand) {
   canvas.width = $("#content").width();
   context.clearRect(0, 0, canvas.width, canvas.height);
-  var ypos = canvas.height - cardHeight - gapHeight;
+
+  // Draw the pile and pack.
+  context.fillText(`Pile: ${numInPile} top: ${topOfPile.number} of ${topOfPile.suit}`, 20, 20);
+  context.fillText('Pack: ' + numInPack, 20, 40);
+
+  // Draw players' hand.
+  const ypos = canvas.height - cardHeight - gapHeight;
   for (let i = 0; i < hand.length; i++) {
-    let card = new Image();
+    const card = new Image();
     card.src = 'images/' + hand[i].imagePath + '.svg';
-    var xpos = (i + 1) * 20 + i * cardWidth;
-    card.onload = drawCardImage(card, xpos, ypos);
+    const xpos = (i + 1) * 20 + i * cardWidth;
+    card.onload = () => context.drawImage(card, xpos, ypos, cardWidth, cardHeight);
   }
 }
 
@@ -144,9 +146,9 @@ socket.on('game started', function(msg){
   $('#game').show(400);
 });
 
-// handle update of cards in hand
-socket.on('hand', function(hand){
-  render(hand);
+// Handle update of gameState e.g. cards in hand
+socket.on('gameState', function(gameState){
+  render(gameState);
 });
 
 //respond to typing events from other users

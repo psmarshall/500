@@ -1,23 +1,25 @@
-var express = require('express');
-var i18n = require('i18n');
-var cookieParser = require('cookie-parser');
-var app = express();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
+import express from 'express';
+import i18n from 'i18n';
+import cookieParser from 'cookie-parser';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import { Game } from './public/game/game.js';
+import { Player } from './public/game/player.js';
 
-var Game = require('./public/game/game');
-var Player = require('./public/game/player');
+var app = express();
+const httpServer = createServer(app);
+const io = new Server(httpServer, { cors: { origin: '*' } });
 
 var locales = ['en', 'sv', 'de'];
 var locale_names = ['English', 'Svenska', 'Deutsch'];
 i18n.configure({
     locales: locales,
     defaultLocale: 'en',
-    directory: __dirname + '/locales'
+    directory: import.meta.dirname + '/locales'
 });
 
 app.set('view engine', 'pug');
-app.use(express.static(__dirname + '/public'));
+app.use(express.static(import.meta.dirname + '/public'));
 //enable multi-lingual support
 app.use(i18n.init);
 //enable cookies
@@ -109,9 +111,10 @@ io.on('connection', function(socket){
     var curGame = games.get(socket.id);
 
     // Deal cards.
-    curGame.deal(5);
-    curGame.eachPlayer(function(player) {
-      io.to(player.id).emit('hand', player.hand);
+    curGame.start();
+    curGame.eachPlayer(function(player, gameState) {
+      io.to(player.id).emit('gameState', gameState);
+      console.log('gameState sent to ' + player.name + ': ', gameState);
     });
   });
 
@@ -185,6 +188,6 @@ function playersToList(players) {
   return list.substring(0, list.length - 2);
 }
 
-http.listen(3000, function(){
+httpServer.listen(3000, function(){
   console.log('listening on *:3000');
 });

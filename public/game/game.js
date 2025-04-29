@@ -19,9 +19,20 @@ export class Game {
     }
   }
 
+  start() {
+    this.deal(5);
+    this.pile = this.pack.draw(1);
+  }
+
   eachPlayer(fn) {
+    const gameState = {
+      numInPack: this.pack.numCards(),
+      numInPile: this.pile.length,
+      topOfPile: this.pile[this.pile.length - 1],
+    };
     for (let player of this.players) {
-      fn(player);
+      gameState.hand = player.hand;
+      fn(player, gameState);
     }
   }
 
