@@ -55,7 +55,7 @@ html
               ul#messages.list-plain
           form#chatForm
             div.input-group
-              input#m.form-control(type="text")
+              input#m.form-control(type="text" autocomplete="off")
               span.input-group-btn
                 button.btn.btn-default(type="submit") #{__('Send')}
     each script in scripts

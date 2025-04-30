@@ -154,7 +154,7 @@ socket.on('chat message', function(msg){
   $('.panel-body').scrollTop($('.panel-body')[0].scrollHeight);
 });
 // Catch typing and emit.
-$('#m').on('keyup', () => {
+$('#m').on('keyup', function() {
   if (this.value.length >= 1) {
     socket.emit('start typing', '');
   } else {
