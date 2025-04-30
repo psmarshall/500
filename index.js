@@ -6,12 +6,12 @@ import { Server } from 'socket.io';
 import { Game } from './public/game/game.js';
 import { Player } from './public/game/player.js';
 
-var app = express();
+const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, { cors: { origin: '*' } });
 
-var locales = ['en', 'sv', 'de'];
-var locale_names = ['English', 'Svenska', 'Deutsch'];
+const locales = ['en', 'sv', 'de'];
+const locale_names = ['English', 'Svenska', 'Deutsch'];
 i18n.configure({
     locales: locales,
     defaultLocale: 'en',
@@ -20,17 +20,14 @@ i18n.configure({
 
 app.set('view engine', 'pug');
 app.use(express.static(import.meta.dirname + '/public'));
-//enable multi-lingual support
 app.use(i18n.init);
-//enable cookies
 app.use(cookieParser());
 
-var players = [];
-var typing = [];
-var games = new Map();
+const players = [];
+const games = new Map();
 
-app.get('/', function(req, res){
-  var loc = req.cookies['500_language'];
+app.get('/', (req, res) => {
+  let loc = req.cookies['500_language'];
   if (loc === null) {
     loc = 'en';
   }
@@ -52,69 +49,69 @@ app.get('/', function(req, res){
   });
 });
 
-io.on('connection', function(socket){
-  var locale = socket.handshake.query.locale;
+io.on('connection', (socket) => {
+  const locale = socket.handshake.query.locale;
   console.log(socket.handshake.query.locale);
   // Join the room for their locale.
   socket.join(locale);
-  socket.on('chat message', function(msg){
+  socket.on('chat message', (msg) => {
     socket.broadcast.emit('chat message', players[socket.id].name + ': ' + msg);
   });
 
-  socket.on('new user', function(name){
+  socket.on('new user', (name) => {
     // Send locale specific messages to each user.
-    for (var i = 0; i < locales.length; i++) {
+    for (let i = 0; i < locales.length; i++) {
       io.to(locales[i]).emit('chat message', name + ' ' +
         i18n.__({phrase: 'has joined the chat', locale: locales[i]}));
     }
 
     console.log(name + ' has connected (' + socket.id + ')');
     // Add the player to the list, then updates everyone's list.
-    var newPlayer = new Player(socket.id, name);
+    const newPlayer = new Player(socket.id, name);
     players[socket.id] = newPlayer;
 
     io.emit('user list', playersToList(players));
     emitGames(io, games);
   });
 
-  socket.on('start typing', function(msg){
+  socket.on('start typing', () => {
     //sends to all except current
     socket.broadcast.emit('start typing', players[socket.id].name);
   });
-  socket.on('stop typing', function(msg){
+  socket.on('stop typing', () => {
     //sends to all except current
     socket.broadcast.emit('stop typing', players[socket.id].name);
   });
 
-  socket.on('get games', function(msg){
+  socket.on('get games', () => {
     emitGames(socket, games);
   });
 
-  socket.on('new game', function(msg){
+  socket.on('new game', () => {
     newGame(socket);
     //update all games lists
     emitGames(io.sockets, games);
     console.log("sent games: ", games);
   });
 
-  socket.on('join game', function(hostId) {
-    var game = games.get(hostId);
+  socket.on('join game', (hostId) => {
+    const game = games.get(hostId);
     game.addPlayer(players[socket.id]);
     socket.join('game ' + hostId);
     // Update all games lists.
     emitGames(io.sockets, games);
   });
 
-  socket.on('start game', function(msg){
+  socket.on('start game', () => {
     console.log('start game: ' + socket.id);
 
     io.to('game ' + socket.id).emit('game started', '');
 
-    var curGame = games.get(socket.id);
+    const curGame = games.get(socket.id);
 
     // Deal cards.
     curGame.start();
-    curGame.eachPlayer(function(player, gameState) {
+    curGame.eachPlayer((player, gameState) => {
       io.to(player.id).emit('gameState', gameState);
       console.log('gameState sent to ' + player.name + ': ', gameState);
     });
@@ -192,12 +189,12 @@ io.on('connection', function(socket){
     });
   });
 
-  socket.on('disconnect', function(){
+  socket.on('disconnect', () => {
     console.log('User disconnected (' + socket.id + ')');
     // The user may not have entered a name yet
     if (players[socket.id] !== undefined) {
         // Send locale specific messages to each user
-      for (var i = 0; i < locales.length; i++) {
+      for (let i = 0; i < locales.length; i++) {
         io.to(locales[i]).emit('chat message', players[socket.id].name + ' ' +
           i18n.__({phrase: 'has left the chat', locale: locales[i]}));
       }
@@ -205,7 +202,7 @@ io.on('connection', function(socket){
       leaveGames(socket);
       delete players[socket.id];
       socket.broadcast.emit('user list', playersToList(players));
-      for (var key in players) {
+      for (const key in players) {
         console.log('Remaining players: ' + key + ': ' + players[key]);
       }
       emitGames(socket.broadcast, games);
@@ -214,25 +211,20 @@ io.on('connection', function(socket){
 });
 
 function newGame(socket) {
-  var hostId = socket.id;
+  const hostId = socket.id;
   // First, leave current game.
   leaveGames(socket);
-  var newGame = new Game(hostId, players[hostId].name, [players[hostId]]);
+  const newGame = new Game(hostId, players[hostId].name, [players[hostId]]);
   games.set(hostId, newGame);
   // Join room for game.
   socket.join('game ' + hostId);
   return newGame;
 }
 
-// Delete the game hosted by the player.
-function deleteGame(hostId) {
-  games.delete(hostId);
-}
-
 // Check all games for the player and delete them if they exist.
 function leaveGames(socket) {
-  var player = players[socket.id];
-  for (var [gameId, game] of games) {
+  const player = players[socket.id];
+  for (const game of games.values()) {
     game.removePlayer(player);
     // Remove the player from the room.
     if (socket) socket.leave('game ' + game.id);
@@ -249,13 +241,9 @@ function emitGames(destination, games) {
 }
 
 function playersToList(players) {
-  var list = '';
-  for (let player of players) {
-    list += player.name + ', ';
-  }
-  return list.substring(0, list.length - 2);
+  return players.map(p => p.name).join(', ');
 }
 
-httpServer.listen(3000, function(){
+httpServer.listen(3000, () => {
   console.log('listening on *:3000');
 });
