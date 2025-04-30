@@ -39,10 +39,10 @@ app.get('/', function(req, res){
   res.render('home', {
     title: 'Welcome',
     scripts: ['/socket.io/socket.io.js',
-          'https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js',
+          'https://code.jquery.com/jquery-3.7.1.min.js',
           '/jquery.cookie.js',
-          'https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js',
-          'http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js'],
+          'https://code.jquery.com/ui/1.14.0-beta.2/jquery-ui.min.js',
+          'https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js'],
     modules: [
       '/client.js',
     ],
