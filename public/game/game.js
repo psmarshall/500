@@ -1,3 +1,4 @@
+import { Card } from './card.js';
 import { Pack } from './pack.js';
 
 export class Game {
@@ -31,17 +32,17 @@ export class Game {
   }
 
   eachPlayer(fn) {
-    const gameState = {
-      numInPack: this.pack.numCards(),
-      numInPile: this.pile.length,
-      topOfPile: this.pile[this.pile.length - 1],
-      myTurn: false,
-      havePickedUp: false,
-      pickedUpPile: false,
-    };
     for (let player of this.players) {
-      gameState.hand = player.hand;
-      gameState.myTurn = player === this.turn.player;
+      const gameState = {
+        numInPack: this.pack.numCards(),
+        numInPile: this.pile.length,
+        topOfPile: this.pile[this.pile.length - 1],
+        hand: player.hand,
+        played: player.played,
+        myTurn: player === this.turn.player,
+        havePickedUp: false,
+        pickedUpPile: false,
+      };
       if (gameState.myTurn) {
         gameState.havePickedUp = this.turn.havePickedUp;
         gameState.pickedUpPile = this.turn.pickedUpPile;
@@ -88,6 +89,19 @@ export class Game {
       havePickedUp: false,
       pickedUpPile: false,
     }
+  }
+
+  playCards(player, cards) {
+    if (!this.turn.player === player) return;
+    if (!this.turn.havePickedUp) return;
+
+    if (!cards.every(card => player.hasCard(card.suit, card.number))) return;
+
+    // TODO: Change when building on existing sets.
+    if (cards.length < 3) return;
+    if (!Card.cardsAreTriple(cards)) return;
+
+    player.playCards(cards);
   }
 
   addPlayer(player) {

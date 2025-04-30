@@ -38,6 +38,7 @@ html
           div#middle
             img#pile.card
             img#pack.card
+            div#playedArea
           div#hand
           div#controls
             div.btn-group
@@ -59,3 +60,5 @@ html
                 button.btn.btn-default(type="submit") #{__('Send')}
     each script in scripts
       script(type='text/javascript', src= script)
+    each script in modules
+      script(type='module', src= script)

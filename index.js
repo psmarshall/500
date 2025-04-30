@@ -42,8 +42,10 @@ app.get('/', function(req, res){
           'https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js',
           '/jquery.cookie.js',
           'https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js',
-          '/client.js',
           'http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js'],
+    modules: [
+      '/client.js',
+    ],
     locales: locales,
     locale_names: locale_names,
     currentLocale: loc
@@ -167,6 +169,24 @@ io.on('connection', function(socket){
     // Trusting client here.
     const curGame = games.get(gameId);
     curGame.putToPile(players[socket.id], card);
+    curGame.eachPlayer((player, gameState) => {
+      io.to(player.id).emit('gameState', gameState);
+    });
+  });
+
+  socket.on('play cards', (cards) => {
+    let gameId;
+    for (const game of games.values()) {
+      if (game.hasPlayer(players[socket.id])) {
+        gameId = game.id;
+        break;
+      }
+    }
+    // TODO Handle error.
+
+    // Trusting client here.
+    const curGame = games.get(gameId);
+    curGame.playCards(players[socket.id], cards);
     curGame.eachPlayer((player, gameState) => {
       io.to(player.id).emit('gameState', gameState);
     });

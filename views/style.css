@@ -23,6 +23,21 @@
 #messages li { padding: 5px 10px; }
 /* #messages li:nth-child(odd) { background: #eee; } */
 
+#playedArea {
+	display: flex;
+	flex-grow: 1;
+	justify-content: flex-end;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.playedSet > .card {
+	width: 60px;
+}
+.playedSet > .card:not(:nth-child(1)) {
+	margin-left: -40px;
+}
+
 .card {
 	width:130px;
 	margin-top: 50px;
@@ -52,7 +67,7 @@
 
 #middle {
 	display: flex;
-  justify-content: space-evenly;
+  /* justify-content: space-evenly; */
 }
 
 #hand {

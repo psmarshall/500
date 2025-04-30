@@ -1,3 +1,5 @@
+import { Card } from './game/card.js';
+
 var socket = io({query: 'locale=' + $.cookie('500_language')});
 //handle user entering their name
 $('#chooseNameForm').submit(function(){
@@ -10,7 +12,7 @@ $('#chooseNameForm').submit(function(){
 });
 
 function render(gameState) {
-  const { hand, numInPack, numInPile, topOfPile, myTurn, havePickedUp, pickedUpPile } = gameState;
+  const { hand, played, numInPack, numInPile, topOfPile, myTurn, havePickedUp, pickedUpPile } = gameState;
 
   turnState.myTurn = myTurn;
   turnState.havePickedUp = havePickedUp;
@@ -22,6 +24,21 @@ function render(gameState) {
 
   const pack = document.getElementById('pack');
   pack.src = 'images/card_back.svg';
+
+  // Draw played cards.
+  const playedDiv = document.getElementById('playedArea');
+  playedDiv.innerHTML = '';
+  for (const playedSet of played) {
+    const playedSetDiv = document.createElement('div');
+    playedSetDiv.className = 'playedSet';
+    for (const card of playedSet.cards) {
+      const cardImg = document.createElement('img');
+      cardImg.src = 'images/' + card.imagePath + '.svg';
+      cardImg.className = 'card';
+      playedSetDiv.append(cardImg);
+    }
+    playedDiv.append(playedSetDiv);
+  }
 
   // Draw players' hand.
   const handDiv = document.getElementById('hand');
@@ -41,7 +58,7 @@ function render(gameState) {
       }
 
       document.getElementById('putToPile').disabled = !turnState.myTurn || !turnState.havePickedUp || selectedCards.size !== 1;
-      document.getElementById('playSelected').disabled = !turnState.myTurn || !turnState.havePickedUp || selectedCards.size !== 3;
+      document.getElementById('playSelected').disabled = !turnState.myTurn || !turnState.havePickedUp || !canPlayTriple(selectedCards);
     }
     handDiv.append(cardImg);
   }
@@ -59,6 +76,13 @@ function render(gameState) {
       adviceDiv.innerText = 'Play cards from your hand, or put a card in the pile to end your turn.';
     }
   }
+}
+
+function canPlayTriple(cards) {
+  cards = Array.from(cards);
+  if (cards.length < 3) return false;
+
+  return Card.cardsAreTriple(cards);
 }
 
 const selectedCards = new Set();
@@ -96,6 +120,15 @@ $('#putToPile').click(() => {
   socket.emit('put to pile', card);
   selectedCards.clear();
   document.getElementById('putToPile').disabled = true;
+});
+
+$('#playSelected').click(() => {
+  if (!turnState.myTurn) {
+    return;
+  }
+  socket.emit('play cards', Array.from(selectedCards));
+  selectedCards.clear();
+  document.getElementById('playSelected').disabled = true;
 });
 
 //handle send message
