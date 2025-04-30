@@ -28,6 +28,7 @@ export class Game {
       player: this.players[0],
       havePickedUp: false,
       pickedUpPile: false,
+      isFirstTurn: true,
     };
   }
 
@@ -42,10 +43,12 @@ export class Game {
         myTurn: player === this.turn.player,
         havePickedUp: false,
         pickedUpPile: false,
+        isFirstTurn: false,
       };
       if (gameState.myTurn) {
         gameState.havePickedUp = this.turn.havePickedUp;
         gameState.pickedUpPile = this.turn.pickedUpPile;
+        gameState.isFirstTurn = this.turn.isFirstTurn;
       }
       fn(player, gameState);
     }
@@ -58,6 +61,10 @@ export class Game {
 
     const cards = this.pack.draw(1);
     player.addToHand(cards);
+
+    // TODO: Remove, this is for easier testing.
+    player.addToHand(this.pack.draw(1));
+    player.addToHand(this.pack.draw(1));
 
     this.turn.havePickedUp = true;
   }
@@ -88,6 +95,11 @@ export class Game {
       player: this.players[(this.players.indexOf(this.turn.player) + 1) % this.players.length],
       havePickedUp: false,
       pickedUpPile: false,
+      isFirstTurn: this.turn.isFirstTurn,
+    };
+    // Once all players have had their first turn.
+    if (this.turn.isFirstTurn && this.turn.player === this.players[0]) {
+      this.turn.isFirstTurn = false;
     }
   }
 
@@ -97,9 +109,9 @@ export class Game {
 
     if (!cards.every(card => player.hasCard(card.suit, card.number))) return;
 
-    // TODO: Change when building on existing sets.
-    if (cards.length < 3) return;
-    if (!Card.cardsAreTriple(cards)) return;
+    if (cards.length < 3 && player.played.length === 0) return false;
+    // TODO: Build on another player's cards.
+    if (!(Card.cardsAreTriple(cards) || Card.cardsCanBuildOn(cards, player.played))) return;
 
     player.playCards(cards);
   }

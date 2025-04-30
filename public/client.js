@@ -12,11 +12,13 @@ $('#chooseNameForm').submit(() => {
 });
 
 function render(gameState) {
-  const { hand, played, topOfPile, myTurn, havePickedUp, pickedUpPile } = gameState;
+  const { hand, played, topOfPile, myTurn, havePickedUp, pickedUpPile, isFirstTurn, havePlacedFirstTriple} = gameState;
 
   turnState.myTurn = myTurn;
   turnState.havePickedUp = havePickedUp;
   turnState.pickedUpPile = pickedUpPile;
+  turnState.isFirstTurn = isFirstTurn;
+  turnState.havePlacedFirstTriple = played.length > 0;
 
   // Draw the pile and pack.
   const pile = document.getElementById('pile');
@@ -58,7 +60,8 @@ function render(gameState) {
       }
 
       document.getElementById('putToPile').disabled = !turnState.myTurn || !turnState.havePickedUp || selectedCards.size !== 1;
-      document.getElementById('playSelected').disabled = !turnState.myTurn || !turnState.havePickedUp || !canPlayTriple(selectedCards);
+      // TODO: Disable play button for non-triples if !havePlacedFirstTriple.
+      document.getElementById('playSelected').disabled = !turnState.myTurn || !turnState.havePickedUp || !canPlayCards(selectedCards, played);
     }
     handDiv.append(cardImg);
   }
@@ -69,20 +72,29 @@ function render(gameState) {
     adviceDiv.innerText = 'Waiting for your turn...';
   } else {
     if (!turnState.havePickedUp) {
-      adviceDiv.innerText = 'Draw from the pack or pick up the pile.';
+      if (turnState.isFirstTurn) {
+        adviceDiv.innerText = 'Draw from the pack. You can\'t pick up the pile on your first turn.';
+      } else {
+        adviceDiv.innerText = 'Draw from the pack or pick up the pile.';
+      }
     } else if (turnState.pickedUpPile) {
       adviceDiv.innerText = 'Put down a triple to avoid -50 points!';
     } else {
-      adviceDiv.innerText = 'Play cards from your hand, or put a card in the pile to end your turn.';
+      if (!turnState.havePlacedFirstTriple) {
+        adviceDiv.innerText = 'Play a triple from your hand, or put a card in the pile to end your turn.';
+      } else {
+        adviceDiv.innerText = 'Play cards from your hand, or put a card in the pile to end your turn.';
+      }
     }
   }
 }
 
-function canPlayTriple(cards) {
+function canPlayCards(cards, played) {
   cards = Array.from(cards);
-  if (cards.length < 3) return false;
+  if (cards.length < 3 && !turnState.havePlacedFirstTriple) return false;
 
-  return Card.cardsAreTriple(cards);
+  // TODO: Build on another player's cards.
+  return Card.cardsAreTriple(cards) || Card.cardsCanBuildOn(cards, played);
 }
 
 const selectedCards = new Set();
@@ -91,6 +103,8 @@ const turnState = {
   myTurn: false,
   havePickedUp: false,
   pickedUpPile: false,
+  isFirstTurn: true,
+  havePlacedFirstTriple: false,
 };
 
 $('#pack').click(() => {
@@ -103,7 +117,7 @@ $('#pack').click(() => {
 });
 
 $('#pile').click(() => {
-  if (!turnState.myTurn || turnState.havePickedUp) {
+  if (!turnState.myTurn || turnState.havePickedUp || turnState.isFirstTurn) {
     return;
   }
   // TODO: Handle empty pile.
