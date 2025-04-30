@@ -23,10 +23,10 @@ export class Game {
   start() {
     this.deal(5);
     this.pile = this.pack.draw(1);
-    console.log('game start', this.players);
     this.turn = {
       player: this.players[0],
-      havePickedUp: false
+      havePickedUp: false,
+      pickedUpPile: false,
     };
   }
 
@@ -35,12 +35,17 @@ export class Game {
       numInPack: this.pack.numCards(),
       numInPile: this.pile.length,
       topOfPile: this.pile[this.pile.length - 1],
-      myTurn: false
+      myTurn: false,
+      havePickedUp: false,
+      pickedUpPile: false,
     };
     for (let player of this.players) {
       gameState.hand = player.hand;
-      console.log('player?', player, this.turn);
       gameState.myTurn = player === this.turn.player;
+      if (gameState.myTurn) {
+        gameState.havePickedUp = this.turn.havePickedUp;
+        gameState.pickedUpPile = this.turn.pickedUpPile;
+      }
       fn(player, gameState);
     }
   }
@@ -54,6 +59,35 @@ export class Game {
     player.addToHand(cards);
 
     this.turn.havePickedUp = true;
+  }
+
+  pickUpPile(player) {
+    if (this.pile.length === 0) return;
+    if (!this.turn.player === player) return;
+    if (this.turn.havePickedUp) return;
+
+    player.addToHand(this.pile);
+    this.pile = [];
+
+    this.turn.havePickedUp = true;
+    this.turn.pickedUpPile = true;
+  }
+
+  putToPile(player, card) {
+    if (!this.turn.player === player) return;
+    if (!this.turn.havePickedUp) return;
+
+    if (!player.hasCard(card.suit, card.number)) return;
+
+    const ourCard = player.removeFromHand(card.suit, card.number);
+    this.pile.push(ourCard);
+
+    // Turn is over.
+    this.turn = {
+      player: this.players[(this.players.indexOf(this.turn.player) + 1) % this.players.length],
+      havePickedUp: false,
+      pickedUpPile: false,
+    }
   }
 
   addPlayer(player) {

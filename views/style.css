@@ -25,7 +25,12 @@
 
 .card {
 	width:130px;
+	margin-top: 50px;
 }
+.card.selected {
+	margin-top: 0px;
+}
+
 .card-placeholder {
 	background-color: gray;
 }
@@ -52,6 +57,14 @@
 
 #hand {
 	display: flex;
+	margin-top: 20px;
+}
+
+#controls {
+	margin-top: 20px;
+}
+
+#advice {
 	margin-top: 20px;
 }
 

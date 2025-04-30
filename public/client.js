@@ -10,11 +10,15 @@ $('#chooseNameForm').submit(function(){
 });
 
 function render(gameState) {
-  const { hand, numInPack, numInPile, topOfPile } = gameState;
+  const { hand, numInPack, numInPile, topOfPile, myTurn, havePickedUp, pickedUpPile } = gameState;
+
+  turnState.myTurn = myTurn;
+  turnState.havePickedUp = havePickedUp;
+  turnState.pickedUpPile = pickedUpPile;
 
   // Draw the pile and pack.
   const pile = document.getElementById('pile');
-  pile.src = 'images/' + topOfPile.imagePath + '.svg';
+  pile.src = 'images/' + (topOfPile ? topOfPile.imagePath : 'empty_card') + '.svg';
 
   const pack = document.getElementById('pack');
   pack.src = 'images/card_back.svg';
@@ -23,18 +27,47 @@ function render(gameState) {
   const handDiv = document.getElementById('hand');
   handDiv.innerHTML = '';
 
+  selectedCards.clear();
   for (const card of hand) {
     const cardImg = document.createElement('img');
     cardImg.src = 'images/' + card.imagePath + '.svg';
     cardImg.className = 'card';
+    cardImg.onclick = () => {
+      cardImg.classList.toggle('selected');
+      if (selectedCards.has(card)) {
+        selectedCards.delete(card);
+      } else {
+        selectedCards.add(card);
+      }
+
+      document.getElementById('putToPile').disabled = !turnState.myTurn || !turnState.havePickedUp || selectedCards.size !== 1;
+      document.getElementById('playSelected').disabled = !turnState.myTurn || !turnState.havePickedUp || selectedCards.size !== 3;
+    }
     handDiv.append(cardImg);
   }
+
+  // Advice
+  const adviceDiv = document.getElementById('advice');
+  if (!turnState.myTurn) {
+    adviceDiv.innerText = 'Waiting for your turn...';
+  } else {
+    if (!turnState.havePickedUp) {
+      adviceDiv.innerText = 'Draw from the pack or pick up the pile.';
+    } else if (turnState.pickedUpPile) {
+      adviceDiv.innerText = 'Put down a triple to avoid -50 points!';
+    } else {
+      adviceDiv.innerText = 'Play cards from your hand, or put a card in the pile to end your turn.';
+    }
+  }
 }
+
+const selectedCards = new Set();
 
 const turnState = {
   myTurn: false,
   havePickedUp: false,
-}
+  pickedUpPile: false,
+};
 
 $('#pack').click(() => {
   if (!turnState.myTurn || turnState.havePickedUp) {
@@ -43,6 +76,26 @@ $('#pack').click(() => {
   // TODO: Handle empty pack.
   socket.emit('pick up from pack', '');
   turnState.havePickedUp = true;
+});
+
+$('#pile').click(() => {
+  if (!turnState.myTurn || turnState.havePickedUp) {
+    return;
+  }
+  // TODO: Handle empty pile.
+  socket.emit('pick up pile', '');
+  turnState.havePickedUp = true;
+  turnState.pickedUpPile = true;
+});
+
+$('#putToPile').click(() => {
+  if (!turnState.myTurn || selectedCards.size !== 1) {
+    return;
+  }
+  const card = Array.from(selectedCards)[0];
+  socket.emit('put to pile', card);
+  selectedCards.clear();
+  document.getElementById('putToPile').disabled = true;
 });
 
 //handle send message

@@ -136,6 +136,42 @@ io.on('connection', function(socket){
     });
   });
 
+  socket.on('pick up pile', () => {
+    let gameId;
+    for (const game of games.values()) {
+      if (game.hasPlayer(players[socket.id])) {
+        gameId = game.id;
+        break;
+      }
+    }
+    // TODO Handle error.
+
+    // Trusting client here.
+    const curGame = games.get(gameId);
+    curGame.pickUpPile(players[socket.id]);
+    curGame.eachPlayer((player, gameState) => {
+      io.to(player.id).emit('gameState', gameState);
+    });
+  });
+
+  socket.on('put to pile', (card) => {
+    let gameId;
+    for (const game of games.values()) {
+      if (game.hasPlayer(players[socket.id])) {
+        gameId = game.id;
+        break;
+      }
+    }
+    // TODO Handle error.
+
+    // Trusting client here.
+    const curGame = games.get(gameId);
+    curGame.putToPile(players[socket.id], card);
+    curGame.eachPlayer((player, gameState) => {
+      io.to(player.id).emit('gameState', gameState);
+    });
+  });
+
   socket.on('disconnect', function(){
     console.log('User disconnected (' + socket.id + ')');
     // The user may not have entered a name yet

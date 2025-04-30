@@ -39,6 +39,12 @@ html
             img#pile.card
             img#pack.card
           div#hand
+          div#controls
+            div.btn-group
+              button#playSelected.btn.btn-primary(type="button" disabled="true") #{__('Play Selected')}
+              button#putToPile.btn.btn-primary(type="button" disabled="true") #{__('Put to Pile')}
+            div#gameStatus
+          div#advice
         div#chat
           div.panel.panel-default
             div.panel-heading

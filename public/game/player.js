@@ -12,4 +12,14 @@ export class Player {
   numCards() {
     return this.hand.length;
   }
+
+  hasCard(suit, number) {
+    return this.hand.some(card => card.suit === suit && card.number === number);
+  }
+
+  removeFromHand(suit, number) {
+    const card = this.hand.find(card => card.suit === suit && card.number === number);
+    this.hand = this.hand.filter(card => !(card.suit === suit && card.number === number));
+    return card;
+  }
 };
