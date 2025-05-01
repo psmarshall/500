@@ -18,7 +18,7 @@ function render(gameState) {
   turnState.havePickedUp = havePickedUp;
   turnState.pickedUpPile = pickedUpPile;
   turnState.isFirstTurn = isFirstTurn;
-  turnState.havePlacedFirstTriple = played.length > 0;
+  turnState.havePlacedFirstTriple = played[0].length > 0;
 
   // Draw the pile and pack.
   const pile = document.getElementById('pile');
@@ -28,18 +28,23 @@ function render(gameState) {
   pack.src = 'images/card_back.svg';
 
   // Draw played cards.
-  const playedDiv = document.getElementById('playedArea');
-  playedDiv.innerHTML = '';
-  for (const playedSet of played) {
-    const playedSetDiv = document.createElement('div');
-    playedSetDiv.className = 'playedSet';
-    for (const card of playedSet.cards) {
-      const cardImg = document.createElement('img');
-      cardImg.src = 'images/' + card.imagePath + '.svg';
-      cardImg.className = 'card';
-      playedSetDiv.append(cardImg);
+  const allPlayedDivs = document.getElementById('playedArea').childNodes;
+  let i = 0;
+  for (const playerPlayed of played) {
+    // TODO: Need more divs for more than 2 players.
+    const playedDiv = allPlayedDivs[i++];
+    playedDiv.innerHTML = '';
+    for (const playedSet of playerPlayed) {
+      const playedSetDiv = document.createElement('div');
+      playedSetDiv.className = 'playedSet';
+      for (const card of playedSet.cards) {
+        const cardImg = document.createElement('img');
+        cardImg.src = 'images/' + card.imagePath + '.svg';
+        cardImg.className = 'card';
+        playedSetDiv.append(cardImg);
+      }
+      playedDiv.append(playedSetDiv);
     }
-    playedDiv.append(playedSetDiv);
   }
 
   // Draw players' hand.
@@ -61,7 +66,7 @@ function render(gameState) {
 
       document.getElementById('putToPile').disabled = !turnState.myTurn || !turnState.havePickedUp || selectedCards.size !== 1;
       // TODO: Disable play button for non-triples if !havePlacedFirstTriple.
-      document.getElementById('playSelected').disabled = !turnState.myTurn || !turnState.havePickedUp || !canPlayCards(selectedCards, played);
+      document.getElementById('playSelected').disabled = !turnState.myTurn || !turnState.havePickedUp || !canPlayCards(selectedCards, played.flat());
     }
     handDiv.append(cardImg);
   }
@@ -93,7 +98,6 @@ function canPlayCards(cards, played) {
   cards = Array.from(cards);
   if (cards.length < 3 && !turnState.havePlacedFirstTriple) return false;
 
-  // TODO: Build on another player's cards.
   return cardsAreTriple(cards) || cardsCanBuildOn(cards, played);
 }
 

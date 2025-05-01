@@ -25,6 +25,13 @@
 
 #playedArea {
 	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+	flex-grow: 1;
+}
+
+.onePlayerPlayedArea {
+	display: flex;
 	flex-grow: 1;
 	justify-content: flex-end;
 	gap: 10px;

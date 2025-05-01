@@ -22,7 +22,8 @@ export class Game {
   }
 
   start() {
-    this.deal(5);
+    // TODO: Should be 5.
+    this.deal(10);
     this.pile = this.pack.draw(1);
     this.turn = {
       player: this.players[0],
@@ -39,7 +40,7 @@ export class Game {
         numInPile: this.pile.length,
         topOfPile: this.pile[this.pile.length - 1],
         hand: player.hand,
-        played: player.played,
+        played: [player.played, ...this.players.filter(p => p !== player).map(p => p.played)],
         myTurn: player === this.turn.player,
         havePickedUp: false,
         pickedUpPile: false,
@@ -63,6 +64,8 @@ export class Game {
     player.addToHand(cards);
 
     // TODO: Remove, this is for easier testing.
+    player.addToHand(this.pack.draw(1));
+    player.addToHand(this.pack.draw(1));
     player.addToHand(this.pack.draw(1));
     player.addToHand(this.pack.draw(1));
 
@@ -111,7 +114,7 @@ export class Game {
 
     if (cards.length < 3 && player.played.length === 0) return false;
     // TODO: Build on another player's cards.
-    if (!(cardsAreTriple(cards) || cardsCanBuildOn(cards, player.played))) return;
+    if (!(cardsAreTriple(cards) || cardsCanBuildOn(cards, this.players.map(p => p.played).flat()))) return;
 
     player.playCards(cards);
   }

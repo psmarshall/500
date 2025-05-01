@@ -9,8 +9,8 @@ export function cardsCanBuildOn(cards, played) {
   const [card] = cards;
   for (const play of played) {
     const playedCards = play.cards;
-    const is3OfAKind = playedCards.length === 3 && playedCards.every(card => card.number === playedCards[0].number);
-    if (is3OfAKind) {
+    const is3PlusOfAKind = playedCards.length >= 3 && playedCards.every(card => card.number === playedCards[0].number);
+    if (is3PlusOfAKind) {
       if (card.number === playedCards[0].number) {
         console.log('Can build on 3 of a kind', card, playedCards);
         return true;
@@ -29,6 +29,7 @@ export function cardsCanBuildOn(cards, played) {
     }
 
     // TODO: Cards can be built on a specific set where there are multiple options.
+    // Can just record whether it was a straight or not?
     // This isn't implemented yet but we'd need to check that here.
     if (cardNumber === startCardNumber - 1 || cardNumber === endCardNumber + 1
         || (cardNumber === 14 && startCardNumber === 2) // Ace can be low.
