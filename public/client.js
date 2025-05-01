@@ -1,4 +1,4 @@
-import { cardsAreTriple, cardsCanBuildOn } from './gameLogic.js';
+import { cardsAreTriple, cardsCanBuildOn } from './game/gameLogic.js';
 
 const socket = io({query: 'locale=' + $.cookie('500_language')});
 // Handle user entering their name.
