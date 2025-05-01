@@ -1,5 +1,5 @@
-import { Card } from './card.js';
 import { Pack } from './pack.js';
+import { cardsAreTriple, cardsCanBuildOn } from './gameLogic.js';
 
 export class Game {
   constructor(id, hostName, players = []) {
@@ -111,7 +111,7 @@ export class Game {
 
     if (cards.length < 3 && player.played.length === 0) return false;
     // TODO: Build on another player's cards.
-    if (!(Card.cardsAreTriple(cards) || Card.cardsCanBuildOn(cards, player.played))) return;
+    if (!(cardsAreTriple(cards) || cardsCanBuildOn(cards, player.played))) return;
 
     player.playCards(cards);
   }

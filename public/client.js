@@ -1,4 +1,4 @@
-import { Card } from './game/card.js';
+import { cardsAreTriple, cardsCanBuildOn } from './gameLogic.js';
 
 const socket = io({query: 'locale=' + $.cookie('500_language')});
 // Handle user entering their name.
@@ -94,7 +94,7 @@ function canPlayCards(cards, played) {
   if (cards.length < 3 && !turnState.havePlacedFirstTriple) return false;
 
   // TODO: Build on another player's cards.
-  return Card.cardsAreTriple(cards) || Card.cardsCanBuildOn(cards, played);
+  return cardsAreTriple(cards) || cardsCanBuildOn(cards, played);
 }
 
 const selectedCards = new Set();
