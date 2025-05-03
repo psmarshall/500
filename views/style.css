@@ -28,6 +28,7 @@
 	flex-direction: column;
 	justify-content: flex-end;
 	flex-grow: 1;
+	gap: 10px;
 }
 
 .onePlayerPlayedArea {
@@ -36,6 +37,9 @@
 	justify-content: flex-end;
 	gap: 10px;
 	flex-wrap: wrap;
+	border: 1px solid #ccc;
+  border-radius: 5px;
+	padding: 15px;
 }
 
 .playedSet > .card {
@@ -47,7 +51,6 @@
 
 .card {
 	width:130px;
-	margin-top: 50px;
 }
 .card.selected {
 	margin-top: 0px;
@@ -75,6 +78,7 @@
 #middle {
 	display: flex;
   /* justify-content: space-evenly; */
+	gap: 10px;
 }
 
 #hand {
