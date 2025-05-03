@@ -45,6 +45,10 @@ export class Game {
         havePickedUp: false,
         pickedUpPile: false,
         isFirstTurn: false,
+        scores: this.players.map(p => ({
+          name: p.name,
+          score: p.score,
+        })),
       };
       if (gameState.myTurn) {
         gameState.havePickedUp = this.turn.havePickedUp;
@@ -104,6 +108,10 @@ export class Game {
     if (this.turn.isFirstTurn && this.turn.player === this.players[0]) {
       this.turn.isFirstTurn = false;
     }
+
+    if (player.hand.length === 0) {
+      this.scoreGame();
+    }
   }
 
   playCards(player, cards) {
@@ -112,11 +120,28 @@ export class Game {
 
     if (!cards.every(card => player.hasCard(card.suit, card.number))) return;
 
+    // You must place a card in the pile to go out.
+    if (player.hand.length === cards.length) return;
+
     if (cards.length < 3 && player.played.length === 0) return false;
     // TODO: Build on another player's cards.
     if (!(cardsAreTriple(cards) || cardsCanBuildOn(cards, this.players.map(p => p.played).flat()))) return;
 
     player.playCards(cards);
+  }
+
+  scoreGame() {
+    for (const player of this.players) {
+      player.score = 0;
+      for (const play of player.played) {
+        for (const card of play.cards) {
+          player.score += card.scoreValue();
+        }
+      }
+      for (const card of player.hand) {
+        player.score -= card.scoreValue();
+      }
+    }
   }
 
   addPlayer(player) {

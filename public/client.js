@@ -12,13 +12,15 @@ $('#chooseNameForm').submit(() => {
 });
 
 function render(gameState) {
-  const { hand, played, topOfPile, myTurn, havePickedUp, pickedUpPile, isFirstTurn, havePlacedFirstTriple} = gameState;
+  const { hand, played, topOfPile, myTurn, havePickedUp, pickedUpPile, isFirstTurn, scores} = gameState;
 
   turnState.myTurn = myTurn;
   turnState.havePickedUp = havePickedUp;
   turnState.pickedUpPile = pickedUpPile;
   turnState.isFirstTurn = isFirstTurn;
   turnState.havePlacedFirstTriple = played[0].length > 0;
+  turnState.scores = scores;
+  turnState.gameOver = scores.some(player => !!player.score);
 
   // Draw the pile and pack.
   const pile = document.getElementById('pile');
@@ -32,7 +34,7 @@ function render(gameState) {
   let i = 0;
   for (const playerPlayed of played) {
     // TODO: Need more divs for more than 2 players.
-    const playedDiv = allPlayedDivs[i++];
+    const playedDiv = allPlayedDivs[i];
     playedDiv.innerHTML = '';
     for (const playedSet of playerPlayed) {
       const playedSetDiv = document.createElement('div');
@@ -45,6 +47,13 @@ function render(gameState) {
       }
       playedDiv.append(playedSetDiv);
     }
+    if (turnState.gameOver) {
+      const scoreDiv = document.createElement('div');
+      scoreDiv.className = 'score';
+      scoreDiv.innerText = `${scores[i].name}: ${scores[i].score} points`;
+      playedDiv.append(scoreDiv);
+    }
+    i++;
   }
 
   // Draw players' hand.
@@ -64,16 +73,20 @@ function render(gameState) {
         selectedCards.add(card);
       }
 
-      document.getElementById('putToPile').disabled = !turnState.myTurn || !turnState.havePickedUp || selectedCards.size !== 1;
+      document.getElementById('putToPile').disabled =
+          turnState.gameOver || !turnState.myTurn || !turnState.havePickedUp || selectedCards.size !== 1;
       // TODO: Disable play button for non-triples if !havePlacedFirstTriple.
-      document.getElementById('playSelected').disabled = !turnState.myTurn || !turnState.havePickedUp || !canPlayCards(selectedCards, played.flat());
+      document.getElementById('playSelected').disabled =
+          turnState.gameOver || !turnState.myTurn || !turnState.havePickedUp || !canPlayCards(selectedCards, played.flat());
     }
     handDiv.append(cardImg);
   }
 
   // Write advice.
   const adviceDiv = document.getElementById('advice');
-  if (!turnState.myTurn) {
+  if (turnState.gameOver) {
+    adviceDiv.innerText = 'Game over!';
+  } else if (!turnState.myTurn) {
     adviceDiv.innerText = 'Waiting for your turn...';
   } else {
     if (!turnState.havePickedUp) {
@@ -112,7 +125,7 @@ const turnState = {
 };
 
 $('#pack').click(() => {
-  if (!turnState.myTurn || turnState.havePickedUp) {
+  if (turnState.gameOver || !turnState.myTurn || turnState.havePickedUp) {
     return;
   }
   // TODO: Handle empty pack.
@@ -121,7 +134,7 @@ $('#pack').click(() => {
 });
 
 $('#pile').click(() => {
-  if (!turnState.myTurn || turnState.havePickedUp || turnState.isFirstTurn) {
+  if (turnState.gameOver || !turnState.myTurn || turnState.havePickedUp || turnState.isFirstTurn) {
     return;
   }
   // TODO: Handle empty pile.
@@ -131,7 +144,7 @@ $('#pile').click(() => {
 });
 
 $('#putToPile').click(() => {
-  if (!turnState.myTurn || selectedCards.size !== 1) {
+  if (turnState.gameOver || !turnState.myTurn || selectedCards.size !== 1) {
     return;
   }
   const card = Array.from(selectedCards)[0];
@@ -141,7 +154,7 @@ $('#putToPile').click(() => {
 });
 
 $('#playSelected').click(() => {
-  if (!turnState.myTurn) {
+  if (turnState.gameOver || !turnState.myTurn) {
     return;
   }
   socket.emit('play cards', Array.from(selectedCards));

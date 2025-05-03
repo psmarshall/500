@@ -5,6 +5,18 @@ export class Card {
     this.imagePath = imagePath;
   }
 
+  // TODO: Does not account for ace low.
+  scoreValue() {
+    if (Card.isFaceCard(this.number)) {
+      return 10;
+    }
+    // TODO: Are 10s worth 10 or 5?
+    if (this.number === 'ace') {
+      return 15;
+    }
+    return 5;
+  }
+
   static isFaceCard(number) {
     return ['jack', 'queen', 'king'].includes(number);
   }
