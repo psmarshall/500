@@ -23,6 +23,10 @@
 #messages li { padding: 5px 10px; }
 /* #messages li:nth-child(odd) { background: #eee; } */
 
+#scoreBox {
+	margin-top: 10px;
+}
+
 #playedArea {
 	display: flex;
 	flex-direction: column;
@@ -37,9 +41,12 @@
 	justify-content: flex-end;
 	gap: 10px;
 	flex-wrap: wrap;
+	padding: 15px;
+}
+
+.boxedArea {
 	border: 1px solid #ccc;
   border-radius: 5px;
-	padding: 15px;
 }
 
 .playedSet > .card {
