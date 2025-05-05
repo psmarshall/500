@@ -23,8 +23,25 @@
 #messages li { padding: 5px 10px; }
 /* #messages li:nth-child(odd) { background: #eee; } */
 
-#scoreBox {
-	margin-top: 10px;
+#left {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	gap: 10px;
+}
+
+#scoreTitle {
+	text-align: center;
+	font-size: 20px;
+}
+
+#scores {
+	display: flex;
+	justify-content: space-evenly;
+}
+
+.player-name {
+	text-decoration: underline;
 }
 
 #playedArea {

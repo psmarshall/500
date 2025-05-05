@@ -12,15 +12,15 @@ $('#chooseNameForm').submit(() => {
 });
 
 function render(gameState) {
-  const { hand, played, topOfPile, myTurn, havePickedUp, pickedUpPile, isFirstTurn, scores} = gameState;
+  const { hand, played, topOfPile, myTurn, havePickedUp, pickedUpPile, isFirstTurn, scorecard} = gameState;
 
   turnState.myTurn = myTurn;
   turnState.havePickedUp = havePickedUp;
   turnState.pickedUpPile = pickedUpPile;
   turnState.isFirstTurn = isFirstTurn;
   turnState.havePlacedFirstTriple = played[0].length > 0;
-  turnState.scores = scores;
-  turnState.gameOver = scores.some(player => !!player.score);
+  turnState.scorecard = scorecard;
+  turnState.gameOver = false; // TODO fix scorecard.some(player => !!player.scores.length);
 
   // Draw the pile and pack.
   const pile = document.getElementById('pile');
@@ -80,6 +80,24 @@ function render(gameState) {
           turnState.gameOver || !turnState.myTurn || !turnState.havePickedUp || !canPlayCards(selectedCards, played.flat());
     }
     handDiv.append(cardImg);
+  }
+
+  // Scores.
+  const scoresDiv = document.getElementById('scores');
+  scoresDiv.innerHTML = '';
+  for (const player of scorecard) {
+    const scoreDiv = document.createElement('div');
+    scoreDiv.className = 'score-container';
+    const playerName = document.createElement('div');
+    playerName.className = 'player-name';
+    playerName.innerText = player.name;
+    scoreDiv.append(playerName);
+    for (const score of player.scores) {
+      const scoreEntry = document.createElement('div');
+      scoreEntry.innerText = `${Math.sign(score) ? '+' : ''}${score}`;
+      scoreDiv.append(scoreEntry);
+    }
+    scoresDiv.append(scoreDiv);
   }
 
   // Write advice.

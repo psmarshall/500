@@ -45,9 +45,10 @@ export class Game {
         havePickedUp: false,
         pickedUpPile: false,
         isFirstTurn: false,
-        scores: this.players.map(p => ({
+        scorecard: this.players.map(p => ({
           name: p.name,
-          score: p.score,
+          // TODO: Should be real scores.
+          scores: [135, -50],
         })),
       };
       if (gameState.myTurn) {
@@ -132,15 +133,16 @@ export class Game {
 
   scoreGame() {
     for (const player of this.players) {
-      player.score = 0;
+      let score = 0;
       for (const play of player.played) {
         for (const card of play.cards) {
-          player.score += card.scoreValue();
+          score += card.scoreValue();
         }
       }
       for (const card of player.hand) {
-        player.score -= card.scoreValue();
+        score -= card.scoreValue();
       }
+      player.scores.push(score);
     }
   }
 

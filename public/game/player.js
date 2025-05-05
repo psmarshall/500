@@ -6,6 +6,7 @@ export class Player {
     this.name = name;
     this.hand = [];
     this.played = [];
+    this.scores = [];
   }
 
   addToHand(cards) {
