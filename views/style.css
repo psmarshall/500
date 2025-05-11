@@ -73,8 +73,11 @@
 	margin-left: -40px;
 }
 
+.card-size {
+	width: 130px;
+}
 .card {
-	width:130px;
+	margin-top: 40px;
 }
 .card.selected {
 	margin-top: 0px;

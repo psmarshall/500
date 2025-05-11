@@ -12,12 +12,13 @@ $('#chooseNameForm').submit(() => {
 });
 
 function render(gameState) {
-  const { hand, played, topOfPile, myTurn, havePickedUp, pickedUpPile, isFirstTurn, scorecard} = gameState;
+  const { hand, played, topOfPile, myTurn, havePickedUp, pickedUpPile, isFirstTurn, havePlayedTriple, scorecard} = gameState;
 
   turnState.myTurn = myTurn;
   turnState.havePickedUp = havePickedUp;
   turnState.pickedUpPile = pickedUpPile;
   turnState.isFirstTurn = isFirstTurn;
+  turnState.havePlayedTriple = havePlayedTriple;
   turnState.havePlacedFirstTriple = played[0].length > 0;
   turnState.scorecard = scorecard;
   turnState.gameOver = false; // TODO fix scorecard.some(player => !!player.scores.length);
@@ -64,7 +65,7 @@ function render(gameState) {
   for (const card of hand) {
     const cardImg = document.createElement('img');
     cardImg.src = 'images/' + card.imagePath + '.svg';
-    cardImg.className = 'card';
+    cardImg.className = 'card card-size';
     cardImg.onclick = () => {
       cardImg.classList.toggle('selected');
       if (selectedCards.has(card)) {
@@ -94,7 +95,7 @@ function render(gameState) {
     scoreDiv.append(playerName);
     for (const score of player.scores) {
       const scoreEntry = document.createElement('div');
-      scoreEntry.innerText = `${Math.sign(score) ? '+' : ''}${score}`;
+      scoreEntry.innerText = `${Math.sign(score) === 1 ? '+' : ''}${score}`;
       scoreDiv.append(scoreEntry);
     }
     scoresDiv.append(scoreDiv);
@@ -113,7 +114,7 @@ function render(gameState) {
       } else {
         adviceDiv.innerText = 'Draw from the pack or pick up the pile.';
       }
-    } else if (turnState.pickedUpPile) {
+    } else if (turnState.pickedUpPile && !turnState.havePlayedTriple) {
       adviceDiv.innerText = 'Put down a triple to avoid -50 points!';
     } else {
       if (!turnState.havePlacedFirstTriple) {
@@ -139,6 +140,7 @@ const turnState = {
   havePickedUp: false,
   pickedUpPile: false,
   isFirstTurn: true,
+  havePlayedTriple: false,
   havePlacedFirstTriple: false,
 };
 

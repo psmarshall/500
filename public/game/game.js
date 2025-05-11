@@ -1,5 +1,5 @@
 import { Pack } from './pack.js';
-import { cardsAreTriple, cardsCanBuildOn } from './gameLogic.js';
+import * as GameLogic from './gameLogic.js';
 
 export class Game {
   constructor(id, hostName, players = []) {
@@ -30,6 +30,7 @@ export class Game {
       havePickedUp: false,
       pickedUpPile: false,
       isFirstTurn: true,
+      havePlayedTriple: false,
     };
   }
 
@@ -55,6 +56,7 @@ export class Game {
         gameState.havePickedUp = this.turn.havePickedUp;
         gameState.pickedUpPile = this.turn.pickedUpPile;
         gameState.isFirstTurn = this.turn.isFirstTurn;
+        gameState.havePlayedTriple = this.turn.havePlayedTriple;
       }
       fn(player, gameState);
     }
@@ -104,6 +106,7 @@ export class Game {
       havePickedUp: false,
       pickedUpPile: false,
       isFirstTurn: this.turn.isFirstTurn,
+      havePlayedTriple: false,
     };
     // Once all players have had their first turn.
     if (this.turn.isFirstTurn && this.turn.player === this.players[0]) {
@@ -123,10 +126,15 @@ export class Game {
 
     // You must place a card in the pile to go out.
     if (player.hand.length === cards.length) return;
-
+    // You must play a triple before building on another set.
     if (cards.length < 3 && player.played.length === 0) return false;
-    // TODO: Build on another player's cards.
-    if (!(cardsAreTriple(cards) || cardsCanBuildOn(cards, this.players.map(p => p.played).flat()))) return;
+    const cardsAreTriple = GameLogic.cardsAreTriple(cards);
+    const cardsCanBuildOn = GameLogic.cardsCanBuildOn(cards, this.players.map(p => p.played).flat());
+    if (!(cardsAreTriple || cardsCanBuildOn)) return;
+
+    if (cardsAreTriple) {
+      this.turn.havePlayedTriple = true;
+    }
 
     player.playCards(cards);
   }
