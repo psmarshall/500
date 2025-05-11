@@ -1,5 +1,6 @@
 import { cardsAreTriple, cardsCanBuildOn } from './game/gameLogic.js';
-import {html, render} from './lit-html.js';
+import { sortHand } from './game/cardUtils.js';
+import { html, render } from './lit-html.js';
 
 const socket = io({query: 'locale=' + $.cookie('500_language')});
 // Handle user entering their name.
@@ -13,7 +14,7 @@ $('#chooseNameForm').submit(() => {
 });
 
 function renderGame(gameState) {
-  const { hand, played, topOfPile, myTurn, havePickedUp, pickedUpPile, isFirstTurn, havePlayedTriple, scorecard} = gameState;
+  const { played, topOfPile, myTurn, havePickedUp, pickedUpPile, isFirstTurn, havePlayedTriple, scorecard} = gameState;
 
   turnState.myTurn = myTurn;
   turnState.havePickedUp = havePickedUp;
@@ -23,6 +24,8 @@ function renderGame(gameState) {
   turnState.havePlacedFirstTriple = played[0].length > 0;
   turnState.scorecard = scorecard;
   turnState.gameOver = false; // TODO fix scorecard.some(player => !!player.scores.length);
+
+  hand = sortHand(gameState.hand, sortBy);
 
   // Draw the pile and pack.
   const pile = document.getElementById('pile');
@@ -40,7 +43,7 @@ function renderGame(gameState) {
           ${player.map(playedSet => html`
             <div class="playedSet">
               ${playedSet.cards.map(card => html`
-                <img src="images/${card.imagePath}.svg" class="card"></img>
+                <img src="images/${card.imagePath}.svg" class="card" />
               `)}
             </div>
           `)}
@@ -51,34 +54,30 @@ function renderGame(gameState) {
           ` : ''}
         </div>`
       )}`;
-  // TOOD: Game over div too.
   render(playedTemplate(played, scores), playedArea);
 
   // Draw players' hand.
   const handDiv = document.getElementById('hand');
-  handDiv.innerHTML = '';
-
   selectedCards.clear();
-  for (const card of hand) {
-    const cardImg = document.createElement('img');
-    cardImg.src = 'images/' + card.imagePath + '.svg';
-    cardImg.className = 'card card-size';
-    cardImg.onclick = () => {
-      cardImg.classList.toggle('selected');
-      if (selectedCards.has(card)) {
-        selectedCards.delete(card);
-      } else {
-        selectedCards.add(card);
-      }
+  const handTemplate = (hand, selectedCards) =>
+    html`${hand.map(card => html`
+      <img src="images/${card.imagePath}.svg" class="card card-size ${selectedCards.has(card) ? 'selected' : ''}" @click=${() => {
+        if (selectedCards.has(card)) {
+          selectedCards.delete(card);
+        } else {
+          selectedCards.add(card);
+        }
 
-      document.getElementById('putToPile').disabled =
-          turnState.gameOver || !turnState.myTurn || !turnState.havePickedUp || selectedCards.size !== 1;
-      // TODO: Disable play button for non-triples if !havePlacedFirstTriple.
-      document.getElementById('playSelected').disabled =
-          turnState.gameOver || !turnState.myTurn || !turnState.havePickedUp || !canPlayCards(selectedCards, played.flat());
-    }
-    handDiv.append(cardImg);
-  }
+        document.getElementById('putToPile').disabled =
+            turnState.gameOver || !turnState.myTurn || !turnState.havePickedUp || selectedCards.size !== 1;
+        // TODO: Disable play button for non-triples if !havePlacedFirstTriple.
+        document.getElementById('playSelected').disabled =
+            turnState.gameOver || !turnState.myTurn || !turnState.havePickedUp || !canPlayCards(selectedCards, played.flat());
+
+        render(handTemplate(hand, selectedCards), handDiv);
+      }} />
+    `)}`;
+  render(handTemplate(hand, selectedCards), handDiv);
 
   // Scores.
   const scoresDiv = document.getElementById('scores');
@@ -134,6 +133,10 @@ const turnState = {
   havePlacedFirstTriple: false,
 };
 
+let sortBy = 'none'; // 'none', 'suit', 'rank'
+
+let hand = [];
+
 $('#pack').click(() => {
   if (turnState.gameOver || !turnState.myTurn || turnState.havePickedUp) {
     return;
@@ -170,6 +173,14 @@ $('#playSelected').click(() => {
   socket.emit('play cards', Array.from(selectedCards));
   selectedCards.clear();
   document.getElementById('playSelected').disabled = true;
+});
+
+$('#sortBySuit').click(() => {
+  sortBy = 'suit';
+});
+
+$('#sortByRank').click(() => {
+  sortBy = 'rank';
 });
 
 // Handle send message.
