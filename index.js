@@ -20,6 +20,7 @@ i18n.configure({
 
 app.set('view engine', 'pug');
 app.use(express.static(import.meta.dirname + '/public'));
+app.use(express.static(import.meta.dirname + '/node_modules/lit-html/'));
 app.use(i18n.init);
 app.use(cookieParser());
 

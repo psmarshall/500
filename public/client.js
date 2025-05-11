@@ -1,4 +1,5 @@
 import { cardsAreTriple, cardsCanBuildOn } from './game/gameLogic.js';
+import {html, render} from './lit-html.js';
 
 const socket = io({query: 'locale=' + $.cookie('500_language')});
 // Handle user entering their name.
@@ -11,7 +12,7 @@ $('#chooseNameForm').submit(() => {
   return false;
 });
 
-function render(gameState) {
+function renderGame(gameState) {
   const { hand, played, topOfPile, myTurn, havePickedUp, pickedUpPile, isFirstTurn, havePlayedTriple, scorecard} = gameState;
 
   turnState.myTurn = myTurn;
@@ -31,31 +32,27 @@ function render(gameState) {
   pack.src = 'images/card_back.svg';
 
   // Draw played cards.
-  const allPlayedDivs = document.getElementById('playedArea').childNodes;
-  let i = 0;
-  for (const playerPlayed of played) {
-    // TODO: Need more divs for more than 2 players.
-    const playedDiv = allPlayedDivs[i];
-    playedDiv.innerHTML = '';
-    for (const playedSet of playerPlayed) {
-      const playedSetDiv = document.createElement('div');
-      playedSetDiv.className = 'playedSet';
-      for (const card of playedSet.cards) {
-        const cardImg = document.createElement('img');
-        cardImg.src = 'images/' + card.imagePath + '.svg';
-        cardImg.className = 'card';
-        playedSetDiv.append(cardImg);
-      }
-      playedDiv.append(playedSetDiv);
-    }
-    if (turnState.gameOver) {
-      const scoreDiv = document.createElement('div');
-      scoreDiv.className = 'score';
-      scoreDiv.innerText = `${scores[i].name}: ${scores[i].score} points`;
-      playedDiv.append(scoreDiv);
-    }
-    i++;
-  }
+  const playedArea = document.getElementById('playedArea');
+  const playedTemplate = (played, scores) =>
+    html`
+      ${played.map((player, i) => html`
+        <div class="onePlayerPlayedArea boxedArea">
+          ${player.map(playedSet => html`
+            <div class="playedSet">
+              ${playedSet.cards.map(card => html`
+                <img src="images/${card.imagePath}.svg" class="card"></img>
+              `)}
+            </div>
+          `)}
+          ${turnState.gameOver ? html`
+            <div class="score">
+              ${scores[i].name}: ${scores[i].score} points
+            </div>
+          ` : ''}
+        </div>`
+      )}`;
+  // TOOD: Game over div too.
+  render(playedTemplate(played, scores), playedArea);
 
   // Draw players' hand.
   const handDiv = document.getElementById('hand');
@@ -85,21 +82,14 @@ function render(gameState) {
 
   // Scores.
   const scoresDiv = document.getElementById('scores');
-  scoresDiv.innerHTML = '';
-  for (const player of scorecard) {
-    const scoreDiv = document.createElement('div');
-    scoreDiv.className = 'score-container';
-    const playerName = document.createElement('div');
-    playerName.className = 'player-name';
-    playerName.innerText = player.name;
-    scoreDiv.append(playerName);
-    for (const score of player.scores) {
-      const scoreEntry = document.createElement('div');
-      scoreEntry.innerText = `${Math.sign(score) === 1 ? '+' : ''}${score}`;
-      scoreDiv.append(scoreEntry);
-    }
-    scoresDiv.append(scoreDiv);
-  }
+  const scoreTemplate = (scorecard) =>
+    html`${scorecard.map(player =>
+        html`<div class="score-container">
+            <div class="player-name">${player.name}</div>
+            ${player.scores.map(score =>
+                html`<div>${Math.sign(score) === 1 ? '+' : ''}${score}</div>`)}
+            </div>`)}`;
+  render(scoreTemplate(scorecard), scoresDiv);
 
   // Write advice.
   const adviceDiv = document.getElementById('advice');
@@ -257,7 +247,7 @@ socket.on('game started', function(msg){
 
 // Handle update of gameState e.g. cards in hand.
 socket.on('gameState', function(gameState){
-  render(gameState);
+  renderGame(gameState);
   turnState.myTurn = gameState.myTurn;
 });
 
