@@ -13,50 +13,39 @@ $('#chooseNameForm').submit(() => {
   return false;
 });
 
-function renderGame(gameState) {
-  const { played, topOfPile, myTurn, havePickedUp, pickedUpPile, isFirstTurn, havePlayedTriple, scorecard} = gameState;
+/* Game State */
+const selectedCards = new Set();
+const turnState = {
+  myTurn: false,
+  havePickedUp: false,
+  pickedUpPile: false,
+  isFirstTurn: true,
+  havePlayedTriple: false,
+  havePlacedFirstTriple: false,
+};
+let sortBy = 'none'; // 'none', 'suit', 'rank'
+let hand = [];
+let topOfPile = null;
+let played = [];
+let scorecard = [];
 
+function setState(gameState) {
+  hand = sortHand(gameState.hand, sortBy);
+  topOfPile = gameState.topOfPile;
+  played = gameState.played;
+  scorecard = gameState.scorecard;
+
+  const { myTurn, havePickedUp, pickedUpPile, isFirstTurn, havePlayedTriple} = gameState;
   turnState.myTurn = myTurn;
   turnState.havePickedUp = havePickedUp;
   turnState.pickedUpPile = pickedUpPile;
   turnState.isFirstTurn = isFirstTurn;
   turnState.havePlayedTriple = havePlayedTriple;
   turnState.havePlacedFirstTriple = played[0].length > 0;
-  turnState.scorecard = scorecard;
   turnState.gameOver = false; // TODO fix scorecard.some(player => !!player.scores.length);
+}
 
-  hand = sortHand(gameState.hand, sortBy);
-
-  // Draw the pile and pack.
-  const pile = document.getElementById('pile');
-  pile.src = 'images/' + (topOfPile ? topOfPile.imagePath : 'empty_card') + '.svg';
-
-  const pack = document.getElementById('pack');
-  pack.src = 'images/card_back.svg';
-
-  // Draw played cards.
-  const playedArea = document.getElementById('playedArea');
-  const playedTemplate = (played, scores) =>
-    html`
-      ${played.map((player, i) => html`
-        <div class="onePlayerPlayedArea boxedArea">
-          ${player.map(playedSet => html`
-            <div class="playedSet">
-              ${playedSet.cards.map(card => html`
-                <img src="images/${card.imagePath}.svg" class="card" />
-              `)}
-            </div>
-          `)}
-          ${turnState.gameOver ? html`
-            <div class="score">
-              ${scores[i].name}: ${scores[i].score} points
-            </div>
-          ` : ''}
-        </div>`
-      )}`;
-  render(playedTemplate(played, scores), playedArea);
-
-  // Draw players' hand.
+function renderHand() {
   const handDiv = document.getElementById('hand');
   selectedCards.clear();
   const handTemplate = (hand, selectedCards) =>
@@ -78,6 +67,32 @@ function renderGame(gameState) {
       }} />
     `)}`;
   render(handTemplate(hand, selectedCards), handDiv);
+}
+
+function renderGame() {
+  // Draw the pile and pack.
+  const pile = document.getElementById('pile');
+  pile.src = 'images/' + (topOfPile ? topOfPile.imagePath : 'empty_card') + '.svg';
+
+  const pack = document.getElementById('pack');
+  pack.src = 'images/card_back.svg';
+
+  // Draw played cards.
+  const playedArea = document.getElementById('playedArea');
+  const playedTemplate = (played) =>
+    html`
+      ${played.map((player, i) => html`
+        <div class="onePlayerPlayedArea boxedArea">
+          ${player.map(playedSet => html`
+            <div class="playedSet">
+              ${playedSet.cards.map(card => html`
+                <img src="images/${card.imagePath}.svg" class="card" />
+              `)}
+            </div>
+          `)}
+        </div>`
+      )}`;
+  render(playedTemplate(played), playedArea);
 
   // Scores.
   const scoresDiv = document.getElementById('scores');
@@ -89,6 +104,8 @@ function renderGame(gameState) {
                 html`<div>${Math.sign(score) === 1 ? '+' : ''}${score}</div>`)}
             </div>`)}`;
   render(scoreTemplate(scorecard), scoresDiv);
+
+  renderHand();
 
   // Write advice.
   const adviceDiv = document.getElementById('advice');
@@ -121,21 +138,6 @@ function canPlayCards(cards, played) {
 
   return cardsAreTriple(cards) || cardsCanBuildOn(cards, played);
 }
-
-const selectedCards = new Set();
-
-const turnState = {
-  myTurn: false,
-  havePickedUp: false,
-  pickedUpPile: false,
-  isFirstTurn: true,
-  havePlayedTriple: false,
-  havePlacedFirstTriple: false,
-};
-
-let sortBy = 'none'; // 'none', 'suit', 'rank'
-
-let hand = [];
 
 $('#pack').click(() => {
   if (turnState.gameOver || !turnState.myTurn || turnState.havePickedUp) {
@@ -177,10 +179,14 @@ $('#playSelected').click(() => {
 
 $('#sortBySuit').click(() => {
   sortBy = 'suit';
+  hand = sortHand(hand, sortBy);
+  renderHand();
 });
 
 $('#sortByRank').click(() => {
   sortBy = 'rank';
+  hand = sortHand(hand, sortBy);
+  renderHand();
 });
 
 // Handle send message.
@@ -258,8 +264,8 @@ socket.on('game started', function(msg){
 
 // Handle update of gameState e.g. cards in hand.
 socket.on('gameState', function(gameState){
-  renderGame(gameState);
-  turnState.myTurn = gameState.myTurn;
+  setState(gameState);
+  renderGame();
 });
 
 // Respond to typing events from other users.

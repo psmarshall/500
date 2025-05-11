@@ -84,38 +84,24 @@
 	margin-top: 0px;
 }
 
-.card-placeholder {
-	background-color: gray;
-}
-.list-item-card {
-	display: inline;
-	float: left;
-	position: absolute;
-}
-.clearfix:after {
-   content: " ";
-   display: block;
-   height: 0;
-   clear: both;
-}
-
 #game {
 	margin-top: 40px;
 }
 
 #middle {
 	display: flex;
-  /* justify-content: space-evenly; */
 	gap: 10px;
 }
 
 #hand {
-	display: flex;
+	display: grid;
 	margin-top: 20px;
+	align-content: center;
+	grid-template-columns: repeat(auto-fit,  minmax(10px, max-content));
 }
 
-#hand > .card:not(:nth-child(1)) {
-	margin-left: -40px;
+.sort-buttons {
+	margin-left: 40px;
 }
 
 #controls {
