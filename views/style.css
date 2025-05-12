@@ -40,6 +40,14 @@
 	justify-content: space-evenly;
 }
 
+.score-box {
+	flex-grow: 1;
+}
+
+.common-cards {
+	display: flex;
+}
+
 .player-name {
 	text-decoration: underline;
 }
@@ -54,7 +62,7 @@
 
 .onePlayerPlayedArea {
 	display: flex;
-	flex-grow: 1;
+	height: 100%;
 	justify-content: flex-end;
 	gap: 10px;
 	flex-wrap: wrap;
