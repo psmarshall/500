@@ -48,8 +48,7 @@ export class Game {
         isFirstTurn: false,
         scorecard: this.players.map(p => ({
           name: p.name,
-          // TODO: Should be real scores.
-          scores: [135, -50],
+          scores: p.scores,
         })),
       };
       if (gameState.myTurn) {
@@ -96,6 +95,10 @@ export class Game {
     if (!this.turn.havePickedUp) return;
 
     if (!player.hasCard(card.suit, card.number)) return;
+
+    if (this.turn.pickedUpPile && !this.turn.havePlayedTriple) {
+      player.scores.push(-50);
+    }
 
     const ourCard = player.removeFromHand(card.suit, card.number);
     this.pile.push(ourCard);
